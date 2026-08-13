@@ -36,71 +36,58 @@ class AppShell extends StatelessWidget {
     final colors = context.colors;
 
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: navigationShell,
+      body: navigationShell,
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.surface,
+          border: Border(top: BorderSide(color: colors.divider)),
         ),
-      ),
-      bottomNavigationBar: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.surface,
-              border: Border(top: BorderSide(color: colors.divider)),
-            ),
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: List.generate(_items.length, (index) {
-                    final item = _items[index];
-                    final isActive = index == navigationShell.currentIndex;
-                    final color = isActive ? colors.accent : colors.tabInactive;
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            child: Row(
+              children: List.generate(_items.length, (index) {
+                final item = _items[index];
+                final isActive = index == navigationShell.currentIndex;
+                final color = isActive ? colors.accent : colors.tabInactive;
 
-                    return Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => navigationShell.goBranch(
-                          index,
-                          initialLocation: index == navigationShell.currentIndex,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isActive ? item.icon : item.outline,
-                                color: color,
-                                size: 24,
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                item.label,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 11,
-                                  fontWeight:
-                                      isActive ? FontWeight.w600 : FontWeight.w500,
-                                  color: color,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              if (isActive) DashedUnderline(color: color),
-                            ],
+                return Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => navigationShell.goBranch(
+                      index,
+                      initialLocation: index == navigationShell.currentIndex,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isActive ? item.icon : item.outline,
+                            color: color,
+                            size: 24,
                           ),
-                        ),
+                          const SizedBox(height: 5),
+                          Text(
+                            item.label,
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 11,
+                              fontWeight:
+                                  isActive ? FontWeight.w600 : FontWeight.w500,
+                              color: color,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          if (isActive) DashedUnderline(color: color),
+                        ],
                       ),
-                    );
-                  }),
-                ),
-              ),
+                    ),
+                  ),
+                );
+              }),
             ),
           ),
         ),
