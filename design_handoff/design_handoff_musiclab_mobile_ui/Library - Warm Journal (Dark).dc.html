@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#1c1712;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#e2916a}
+  a:hover{color:#eda583}
+  ::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 24px">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ 412 }}" height="{{ 892 }}" dark="{{ true }}" hint-size="412px,892px">
+
+<div style="height:100%;display:flex;flex-direction:column;background:#201f1f;position:relative">
+
+  <div style="flex:1;overflow-y:auto;padding-bottom:8px">
+
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:20px 22px 6px">
+      <div>
+        <div style="font:400 13px/1.3 'Inter';color:#a3b39a;letter-spacing:.03em;text-transform:uppercase">Library</div>
+        <div style="font:700 27px/1.25 'Kalam',cursive;color:#f3ece1;margin-top:4px">Your pieces</div>
+      </div>
+      <button style="background:#DF781D;color:#2b1c10;border:2px solid #55483a;border-radius:100px;padding:10px 17px;font:700 13px/1 'Inter';cursor:pointer;white-space:nowrap" onClick="{{ openAdd }}">+ Add</button>
+    </div>
+    <div style="padding:0 22px 4px;font:500 13px/1.5 'Inter';color:#a5977f">{{ pieces.length }} pieces &nbsp;·&nbsp; Piano</div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;padding:14px 20px 4px">
+      <sc-for list="{{ pieces }}" as="p" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:14px;background:#DF781D;border:2px solid #55483a;border-radius:16px;padding:14px 16px">
+          <svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0">
+            <circle cx="23" cy="23" r="19" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="5"></circle>
+            <circle cx="23" cy="23" r="19" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="{{ p.ringDash }}" stroke-linecap="round" transform="rotate(-90 23 23)"></circle>
+          </svg>
+          <div style="flex:1;min-width:0">
+            <div style="font:700 16px/1.3 'Kalam',cursive;color:#2b1c10">{{ p.title }}</div>
+            <div style="font:400 12px/1.4 'Inter';color:rgba(43,28,16,.65);margin-top:2px">{{ p.instrument }} · goal: {{ p.goal }}</div>
+          </div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#2b1c10;flex-shrink:0"></div>
+        </div>
+      </sc-for>
+    </div>
+
+  </div>
+
+  <div style="display:flex;border-top:1px solid rgba(43,28,16,.2);background:#DF781D;padding:8px 6px calc(env(safe-area-inset-bottom,0px) + 6px)">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0;cursor:pointer" onClick="{{ t.onSelect }}">
+        <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center">
+          <div style="{{ t.iconStyle }}"></div>
+        </div>
+        <div style="font:{{ t.labelWeight }} 11px/1 'Inter';color:{{ t.labelColor }};border-bottom:{{ t.underline }};padding-bottom:2px">{{ t.name }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;z-index:5" onClick="{{ closeAdd }}">
+      <div style="background:#201f1f;border-radius:26px 26px 0 0;padding:22px 22px calc(env(safe-area-inset-bottom,0px) + 22px);width:100%;box-sizing:border-box;border-top:2px solid #55483a" onClick="{{ stop }}">
+        <div style="width:40px;height:5px;border-radius:3px;background:#55483a;margin:0 auto 16px"></div>
+        <div style="font:700 22px/1.2 'Kalam',cursive;color:#f3ece1">Add a piece</div>
+        <div style="margin-top:16px;font:600 12px/1 'Inter';color:#a5977f;text-transform:uppercase;letter-spacing:.06em">Title</div>
+        <div style="margin-top:6px;background:#2a2827;border:2px solid #55483a;border-radius:14px;padding:12px 14px;font:400 14px/1 'Inter';color:#a5977f">e.g. Für Elise</div>
+        <div style="margin-top:14px;font:600 12px/1 'Inter';color:#a5977f;text-transform:uppercase;letter-spacing:.06em">Instrument</div>
+        <div style="margin-top:6px;display:inline-flex;background:#DF781D;color:#2b1c10;border-radius:100px;padding:9px 16px;font:600 13px/1 'Inter'">Piano</div>
+        <div style="margin-top:14px;font:600 12px/1 'Inter';color:#a5977f;text-transform:uppercase;letter-spacing:.06em">Goal</div>
+        <div style="margin-top:6px;background:#2a2827;border:2px solid #55483a;border-radius:14px;padding:12px 14px;font:400 14px/1 'Inter';color:#a5977f">e.g. Play it for grandma's birthday</div>
+        <button style="margin-top:20px;width:100%;background:#DF781D;color:#2b1c10;border:none;border-radius:100px;padding:13px;font:700 14px/1 'Inter';cursor:pointer" onClick="{{ closeAdd }}">Add piece</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:508,&quot;height&quot;:988}}">
+class Component extends DCLogic {
+  state = { activeTab: 'library', addOpen: false };
+
+  renderVals() {
+    const activeTab = this.state.activeTab;
+    const pieces = [
+      { title: 'Clair de Lune', instrument: 'Piano', goal: 'play smoothly', pct: 62 },
+      { title: 'Prelude in C', instrument: 'Piano', goal: 'memorize', pct: 88 },
+      { title: 'River Flows in You', instrument: 'Piano', goal: 'learn by ear', pct: 14 },
+      { title: 'Für Elise', instrument: 'Piano', goal: 'perform at recital', pct: 40 },
+    ].map(p => ({ ...p, ringDash: `${(p.pct / 100) * 119.4} 119.4` }));
+
+    const tabDefs = [
+      { key: 'home', name: 'Home' },
+      { key: 'library', name: 'Library' },
+      { key: 'journey', name: 'Journey' },
+      { key: 'profile', name: 'Profile' },
+    ];
+    const tabs = tabDefs.map(t => {
+      const isActive = t.key === activeTab;
+      const color = isActive ? '#2b1c10' : 'rgba(43,28,16,.5)';
+      let icon;
+      if (t.key === 'home') icon = `width:16px;height:16px;border-radius:4px;background:${color}`;
+      else if (t.key === 'library') icon = `width:15px;height:16px;border-left:3px solid ${color};border-right:3px solid ${color};box-sizing:border-box`;
+      else if (t.key === 'journey') icon = `width:16px;height:16px;border-radius:50%;border:2px solid ${color};box-sizing:border-box`;
+      else icon = `width:14px;height:14px;border-radius:50%;background:${color}`;
+      return {
+        name: t.name,
+        iconStyle: icon,
+        labelColor: color,
+        labelWeight: isActive ? 600 : 500,
+        underline: isActive ? '2px dashed #2b1c10' : '2px solid transparent',
+        onSelect: () => this.setState({ activeTab: t.key }),
+      };
+    });
+
+    return {
+      pieces,
+      tabs,
+      addOpen: this.state.addOpen,
+      openAdd: () => this.setState({ addOpen: true }),
+      closeAdd: () => this.setState({ addOpen: false }),
+      stop: e => e.stopPropagation(),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

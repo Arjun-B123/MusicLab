@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#efe4d6;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#d97a4a}
+  a:hover{color:#c15f30}
+  ::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 24px">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" width="{{ 412 }}" height="{{ 892 }}" dark="{{ false }}" hint-size="412px,892px">
+
+<div style="height:100%;display:flex;flex-direction:column;background:#faf3ea">
+
+  <div style="flex:1;overflow-y:auto;padding-bottom:8px">
+
+    <div style="padding:20px 22px 4px">
+      <div style="font:400 13px/1.3 'Inter';color:#8a9a7e;letter-spacing:.03em;text-transform:uppercase">Journey</div>
+      <div style="font:700 27px/1.25 'Kalam',cursive;color:#3a2b22;margin-top:4px">Your musical story</div>
+    </div>
+
+    <div style="position:relative;padding:22px 22px 20px 42px">
+      <div style="position:absolute;left:33px;top:8px;bottom:8px;width:3px;background:#ecdfc9;border-radius:2px"></div>
+
+      <sc-for list="{{ entries }}" as="e" hint-placeholder-count="6">
+        <div style="position:relative;padding-bottom:26px">
+          <div style="position:absolute;left:-42px;top:0;width:22px;height:22px;border-radius:50%;background:{{ e.dotBg }};border:3px solid #faf3ea;display:flex;align-items:center;justify-content:center">
+            <div style="{{ e.dotInner }}"></div>
+          </div>
+          <div style="font:600 11px/1 'Inter';color:#b0a494;text-transform:uppercase;letter-spacing:.05em">{{ e.date }}</div>
+          <div style="margin-top:5px;background:#fff;border:2px solid #ecdfc9;border-radius:16px;padding:13px 15px">
+            <div style="font:700 15px/1.3 'Kalam',cursive;color:#3a2b22">{{ e.title }}</div>
+            <sc-if value="{{ e.body }}" hint-placeholder-val="{{ false }}">
+              <div style="font:400 13px/1.5 'Inter';color:#8a7a6d;margin-top:4px">{{ e.body }}</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+  </div>
+
+  <div style="display:flex;border-top:1px solid rgba(58,43,34,.1);background:#fff;padding:8px 6px calc(env(safe-area-inset-bottom,0px) + 6px)">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0;cursor:pointer" onClick="{{ t.onSelect }}">
+        <div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center">
+          <div style="{{ t.iconStyle }}"></div>
+        </div>
+        <div style="font:{{ t.labelWeight }} 11px/1 'Inter';color:{{ t.labelColor }};border-bottom:{{ t.underline }};padding-bottom:2px">{{ t.name }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+
+</x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:508,&quot;height&quot;:988}}">
+class Component extends DCLogic {
+  state = { activeTab: 'journey' };
+
+  renderVals() {
+    const activeTab = this.state.activeTab;
+    const entries = [
+      { date: 'Aug 11', title: 'Recorded a new take of Clair de Lune', body: 'Left hand finally steady on the arpeggios.', dotBg: '#d97a4a', dotInner: 'width:8px;height:8px;border-radius:50%;background:#fff' },
+      { date: 'Aug 9', title: 'Diary entry on Prelude in C', body: 'Rough middle section, but the ending is there.', dotBg: '#d97a4a', dotInner: 'width:8px;height:8px;border-radius:50%;background:#fff' },
+      { date: 'Jul 30', title: 'River Flows in You — 25% mastered', body: null, dotBg: '#f2c94c', dotInner: 'width:8px;height:8px;border-radius:50%;background:#fff' },
+      { date: 'Jul 24', title: 'Started River Flows in You', body: 'Learning it by ear, no sheet music.', dotBg: '#fff', dotInner: 'width:8px;height:8px;border-radius:50%;background:#ecdfc9' },
+      { date: 'Jul 12', title: 'Prelude in C — 88% mastered', body: null, dotBg: '#f2c94c', dotInner: 'width:8px;height:8px;border-radius:50%;background:#fff' },
+      { date: 'Jun 30', title: 'Started Clair de Lune', body: 'First piece with a real goal: play it for Mom.', dotBg: '#fff', dotInner: 'width:8px;height:8px;border-radius:50%;background:#ecdfc9' },
+    ];
+
+    const tabDefs = [
+      { key: 'home', name: 'Home' },
+      { key: 'library', name: 'Library' },
+      { key: 'journey', name: 'Journey' },
+      { key: 'profile', name: 'Profile' },
+    ];
+    const tabs = tabDefs.map(t => {
+      const isActive = t.key === activeTab;
+      const color = isActive ? '#d97a4a' : '#b0a494';
+      let icon;
+      if (t.key === 'home') icon = `width:16px;height:16px;border-radius:4px;background:${color}`;
+      else if (t.key === 'library') icon = `width:15px;height:16px;border-left:3px solid ${color};border-right:3px solid ${color};box-sizing:border-box`;
+      else if (t.key === 'journey') icon = `width:16px;height:16px;border-radius:50%;border:2px solid ${color};box-sizing:border-box`;
+      else icon = `width:14px;height:14px;border-radius:50%;background:${color}`;
+      return {
+        name: t.name,
+        iconStyle: icon,
+        labelColor: color,
+        labelWeight: isActive ? 600 : 500,
+        underline: isActive ? '2px dashed #d97a4a' : '2px solid transparent',
+        onSelect: () => this.setState({ activeTab: t.key }),
+      };
+    });
+
+    return { entries, tabs };
+  }
+}
+
+</script>
+</body>
+</html>

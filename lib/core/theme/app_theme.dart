@@ -1,41 +1,178 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Central theme. Deliberately calm/warm rather than a generic Material
-/// default — the product is a personal journal as much as a tool.
+/// "Warm Journal" design tokens — see design_handoff/README.md for the
+/// original handoff spec this was built from. Colors/type/spacing here are
+/// final per that handoff; this file is the single source of truth for both
+/// themes rather than duplicating values across screens.
+class AppColors {
+  final Color background;
+  final Color surface;
+  final Color surfaceBorder;
+  final Color ink;
+  final Color inkSoft;
+  final Color inkFaint;
+  final Color accent;
+  final Color accentDark;
+  final Color sage;
+  final Color gold;
+  final Color tabInactive;
+  final Color divider;
+  final Color onAccent;
+
+  const AppColors({
+    required this.background,
+    required this.surface,
+    required this.surfaceBorder,
+    required this.ink,
+    required this.inkSoft,
+    required this.inkFaint,
+    required this.accent,
+    required this.accentDark,
+    required this.sage,
+    required this.gold,
+    required this.tabInactive,
+    required this.divider,
+    required this.onAccent,
+  });
+
+  static const light = AppColors(
+    background: Color(0xFFFAF3EA),
+    surface: Color(0xFFFFFFFF),
+    surfaceBorder: Color(0xFFECDFC9),
+    ink: Color(0xFF3A2B22),
+    inkSoft: Color(0xFF8A7A6D),
+    inkFaint: Color(0xFFA3947F),
+    accent: Color(0xFFD97A4A),
+    accentDark: Color(0xFFC15F30),
+    sage: Color(0xFF8A9A7E),
+    gold: Color(0xFFF2C94C),
+    tabInactive: Color(0xFFB0A494),
+    divider: Color(0x1A3A2B22),
+    onAccent: Color(0xFFFFFFFF),
+  );
+
+  // Dark theme: card fills use the saturated orange per the handoff (not a
+  // muted/desaturated dark-mode accent) — this is a deliberate "Warm
+  // Journal" choice, not an oversight.
+  static const dark = AppColors(
+    background: Color(0xFF201F1F),
+    surface: Color(0xFFDF781D),
+    surfaceBorder: Color(0xFF55483A),
+    ink: Color(0xFF2B1C10),
+    inkSoft: Color(0x9E2B1C10),
+    inkFaint: Color(0x802B1C10),
+    accent: Color(0xFFDF781D),
+    accentDark: Color(0xFFC15F30),
+    sage: Color(0xFFA5977F),
+    gold: Color(0xFFF2C94C),
+    tabInactive: Color(0xFFC9BBA8),
+    divider: Color(0x33FFFFFF),
+    onAccent: Color(0xFFFFFFFF),
+  );
+
+  /// Plain-background text (headers, non-card copy) in dark mode is cream,
+  /// not ink — since "ink" in dark mode is the espresso text-on-orange-card
+  /// color. Only used in dark mode; light mode's "ink" already serves both.
+  static const darkOnBackground = Color(0xFFF3ECE1);
+
+  /// Free-plan / neutral card fill in dark mode (Profile) — distinct from
+  /// the orange "surface" used for content cards.
+  static const darkNeutralSurface = Color(0xFF3A3129);
+}
+
 class AppTheme {
-  static const _seed = Color(0xFF6D2740); // deep wine, matches the audit doc
-
-  static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _seed,
-      brightness: Brightness.light,
+  /// Headline/title font — used sparingly (greetings, section headers,
+  /// piece titles), never for body text or dense UI.
+  static TextStyle handwritten({
+    required double size,
+    required Color color,
+    FontWeight weight = FontWeight.w700,
+    double height = 1.25,
+  }) {
+    return GoogleFonts.kalam(
+      fontSize: size,
+      color: color,
+      fontWeight: weight,
+      height: height,
     );
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFFFAF9F6),
+  }
+
+  static ThemeData _build(AppColors c, Brightness brightness) {
+    final base = ThemeData(brightness: brightness, useMaterial3: true);
+    final textTheme = GoogleFonts.interTextTheme(base.textTheme).apply(
+      bodyColor: c.ink,
+      displayColor: c.ink,
+    );
+
+    return base.copyWith(
+      scaffoldBackgroundColor: c.background,
+      textTheme: textTheme,
+      colorScheme: base.colorScheme.copyWith(
+        brightness: brightness,
+        primary: c.accent,
+        onPrimary: c.onAccent,
+        surface: c.surface,
+        onSurface: c.ink,
+        error: const Color(0xFFB3261E),
+      ),
       appBarTheme: AppBarTheme(
-        backgroundColor: const Color(0xFFFAF9F6),
-        foregroundColor: scheme.onSurface,
+        backgroundColor: c.background,
+        foregroundColor: c.ink,
         elevation: 0,
+        titleTextStyle: handwritten(size: 20, color: c.ink),
+      ),
+      cardTheme: CardThemeData(
+        color: c.surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: c.surfaceBorder, width: 2),
+        ),
+      ),
+      dividerTheme: DividerThemeData(color: c.divider, thickness: 1),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: c.accent,
+          foregroundColor: c.onAccent,
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+          textStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: c.accent,
+          side: BorderSide(color: c.accent, width: 1.5),
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+          textStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: c.accent),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: c.ink,
+        contentTextStyle: GoogleFonts.inter(color: c.background),
       ),
     );
   }
 
-  static ThemeData dark() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _seed,
-      brightness: Brightness.dark,
-    );
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFF181513),
-      appBarTheme: AppBarTheme(
-        backgroundColor: const Color(0xFF181513),
-        foregroundColor: scheme.onSurface,
-        elevation: 0,
-      ),
-    );
-  }
+  static ThemeData light() => _build(AppColors.light, Brightness.light);
+  static ThemeData dark() => _build(AppColors.dark, Brightness.dark);
+}
+
+/// Convenience accessor so widgets can grab the current theme's Warm
+/// Journal tokens without importing AppColors' light/dark statics directly.
+extension AppColorsContext on BuildContext {
+  AppColors get colors => Theme.of(this).brightness == Brightness.dark
+      ? AppColors.dark
+      : AppColors.light;
 }

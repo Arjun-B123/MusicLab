@@ -54,6 +54,17 @@ class Piece {
   /// rhythm-only feedback.
   bool get hasTutorialData => referenceDataPath != null;
 
+  /// A rough stand-in for "% mastered", used to drive the progress rings in
+  /// the UI. This is NOT a real measurement — actual mastery scoring
+  /// requires Milestone 6 (performance analysis) and doesn't exist yet.
+  /// Swap this out once real per-piece analysis scores exist.
+  double get approximateProgress => switch (status) {
+        PieceStatus.started => 0.1,
+        PieceStatus.learning => 0.5,
+        PieceStatus.learned => 1.0,
+        PieceStatus.paused => 0.3,
+      };
+
   factory Piece.fromJson(Map<String, dynamic> json) {
     return Piece(
       id: json['id'] as String,
