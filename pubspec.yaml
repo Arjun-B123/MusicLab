@@ -40,6 +40,7 @@ dependencies:
 
   # Monetization: RevenueCat, required for Shipaton eligibility
   purchases_flutter: ^8.5.0
+  purchases_ui_flutter: ^8.5.0
 
   # Navigation
   go_router: ^14.6.2
