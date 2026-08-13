@@ -23,7 +23,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
     _piecesFuture = _repository.fetchPieces();
   }
 
-  void _refresh() => setState(() => _piecesFuture = _repository.fetchPieces());
+  void _refresh() {
+    setState(() {
+      _piecesFuture = _repository.fetchPieces();
+    });
+  }
 
   Future<void> _showAddPieceSheet() async {
     final colors = context.colors;
@@ -60,21 +64,36 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   ),
                 ),
               ),
-              Text('Add a piece', style: AppTheme.handwritten(size: 22, color: colors.ink)),
+              Text(
+                'Add a piece',
+                style: AppTheme.handwritten(size: 22, color: colors.ink),
+              ),
               _FieldLabel('Title', colors),
-              _AddPieceField(controller: titleController, hint: 'e.g. Für Elise', colors: colors),
+              _AddPieceField(
+                controller: titleController,
+                hint: 'e.g. Für Elise',
+                colors: colors,
+              ),
               _FieldLabel('Instrument', colors),
               const SizedBox(height: 6),
               // Piano-only for now, matches the current build's scope.
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: colors.accent,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
                   'Piano',
-                  style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 13, color: colors.onAccent),
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: colors.onAccent,
+                  ),
                 ),
               ),
               _FieldLabel('Goal (optional)', colors),
@@ -104,14 +123,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
       await _repository.createPiece(
         title: titleController.text.trim(),
         instrument: 'piano',
-        goal: goalController.text.trim().isEmpty ? null : goalController.text.trim(),
+        goal: goalController.text.trim().isEmpty
+            ? null
+            : goalController.text.trim(),
       );
       _refresh();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Couldn't add that piece: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Couldn't add that piece: $e")));
     }
   }
 
@@ -120,100 +141,116 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final colors = context.colors;
 
     return Scaffold(
-      body: FutureBuilder<List<Piece>>(
-        future: _piecesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text("Couldn't load your pieces: ${snapshot.error}"),
-              ),
-            );
-          }
-
-          final pieces = snapshot.data ?? [];
-
-          return RefreshIndicator(
-            onRefresh: () async => _refresh(),
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 20, 22, 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'LIBRARY',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 13,
-                              color: colors.sage,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text('Your pieces', style: AppTheme.handwritten(size: 27, color: colors.ink)),
-                        ],
-                      ),
-                      FilledButton(
-                        onPressed: _showAddPieceSheet,
-                        child: const Text('+ Add'),
-                      ),
-                    ],
-                  ),
+      body: SafeArea(
+        bottom: false,
+        child: FutureBuilder<List<Piece>>(
+          future: _piecesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text("Couldn't load your pieces: ${snapshot.error}"),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 0, 22, 4),
-                  child: Text(
-                    '${pieces.length} piece${pieces.length == 1 ? '' : 's'} · Piano',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: colors.inkFaint),
-                  ),
-                ),
-                if (pieces.isEmpty)
+              );
+            }
+
+            final pieces = snapshot.data ?? [];
+
+            return RefreshIndicator(
+              onRefresh: () async => _refresh(),
+              child: ListView(
+                children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 40, 22, 20),
-                    child: Text(
-                      "No pieces yet — tap + Add to add the one you're learning.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: colors.inkSoft),
-                    ),
-                  )
-                else
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
-                    child: Column(
+                    padding: const EdgeInsets.fromLTRB(22, 20, 22, 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        for (final piece in pieces)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _PieceRow(
-                              piece: piece,
-                              colors: colors,
-                              onTap: () async {
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => PieceDetailScreen(piece: piece),
-                                  ),
-                                );
-                                _refresh();
-                              },
-                            ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'LIBRARY',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 13,
+                                  color: colors.sage,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Your pieces',
+                                style: AppTheme.handwritten(
+                                  size: 27,
+                                  color: colors.ink,
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          onPressed: _showAddPieceSheet,
+                          child: const Text('+ Add'),
+                        ),
                       ],
                     ),
                   ),
-              ],
-            ),
-          );
-        },
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(22, 0, 22, 4),
+                    child: Text(
+                      '${pieces.length} piece${pieces.length == 1 ? '' : 's'} · Piano',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 13,
+                        color: colors.inkFaint,
+                      ),
+                    ),
+                  ),
+                  if (pieces.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(22, 40, 22, 20),
+                      child: Text(
+                        "No pieces yet — tap + Add to add the one you're learning.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: colors.inkSoft),
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
+                      child: Column(
+                        children: [
+                          for (final piece in pieces)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _PieceRow(
+                                piece: piece,
+                                colors: colors,
+                                onTap: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          PieceDetailScreen(piece: piece),
+                                    ),
+                                  );
+                                  _refresh();
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -243,7 +280,11 @@ class _FieldLabel extends StatelessWidget {
 }
 
 class _AddPieceField extends StatelessWidget {
-  const _AddPieceField({required this.controller, required this.hint, required this.colors});
+  const _AddPieceField({
+    required this.controller,
+    required this.hint,
+    required this.colors,
+  });
   final TextEditingController controller;
   final String hint;
   final AppColors colors;
@@ -257,10 +298,17 @@ class _AddPieceField extends StatelessWidget {
         style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: colors.ink),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(fontFamily: 'Inter', fontSize: 14, color: colors.inkFaint),
+          hintStyle: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 14,
+            color: colors.inkFaint,
+          ),
           filled: true,
           fillColor: colors.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: colors.surfaceBorder, width: 2),
@@ -280,7 +328,11 @@ class _AddPieceField extends StatelessWidget {
 }
 
 class _PieceRow extends StatelessWidget {
-  const _PieceRow({required this.piece, required this.colors, required this.onTap});
+  const _PieceRow({
+    required this.piece,
+    required this.colors,
+    required this.onTap,
+  });
 
   final Piece piece;
   final AppColors colors;
@@ -288,7 +340,9 @@ class _PieceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dotColor = piece.status == PieceStatus.learned ? colors.accent : colors.gold;
+    final dotColor = piece.status == PieceStatus.learned
+        ? colors.accent
+        : colors.gold;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -325,7 +379,11 @@ class _PieceRow extends StatelessWidget {
                         : piece.instrument,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: colors.inkFaint),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      color: colors.inkFaint,
+                    ),
                   ),
                 ],
               ),
@@ -333,7 +391,10 @@ class _PieceRow extends StatelessWidget {
             Container(
               width: 8,
               height: 8,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: dotColor),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: dotColor,
+              ),
             ),
           ],
         ),

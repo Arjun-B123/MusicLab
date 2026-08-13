@@ -162,8 +162,9 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
                         ),
                       const SizedBox(height: 8),
                       FloatingActionButton.large(
-                        onPressed:
-                            _isRecording ? _stopRecording : _startRecording,
+                        onPressed: _isRecording
+                            ? _stopRecording
+                            : _startRecording,
                         backgroundColor: _isRecording
                             ? Theme.of(context).colorScheme.error
                             : null,

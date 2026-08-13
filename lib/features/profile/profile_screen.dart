@@ -104,103 +104,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : null;
 
     return Scaffold(
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 20, 22, 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'PROFILE',
-                  style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: colors.sage, letterSpacing: 0.4),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  isAnonymous ? 'Your account' : (user?.email ?? 'Your account'),
-                  style: AppTheme.handwritten(size: 27, color: colors.ink),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(color: colors.surfaceBorder, shape: BoxShape.circle),
-                  child: Icon(Icons.person_outline, color: colors.inkFaint),
-                ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isAnonymous ? 'Anonymous account' : (user?.email ?? ''),
-                      style: AppTheme.handwritten(size: 15, color: colors.ink),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      joined != null ? 'Piano · joined $joined' : 'Piano',
-                      style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: colors.inkFaint),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: subscription.isPro
-                ? _ProCard(colors: colors, busy: _busy, onManage: () => presentCustomerCenter(context))
-                : _FreeCard(colors: colors, busy: _busy, onUpgrade: _handleUpgrade),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: colors.surfaceBorder, width: 2),
-              ),
+      body: SafeArea(
+        bottom: false,
+        child: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 20, 22, 4),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _MenuRow(
-                    icon: Icons.refresh,
-                    label: 'Restore purchases',
-                    colors: colors,
-                    showDivider: true,
-                    onTap: _busy ? null : _handleRestore,
-                  ),
-                  if (subscription.isPro)
-                    _MenuRow(
-                      icon: Icons.settings_outlined,
-                      label: 'Manage subscription',
-                      colors: colors,
-                      showDivider: true,
-                      onTap: _busy ? null : () => presentCustomerCenter(context),
+                  Text(
+                    'PROFILE',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 13,
+                      color: colors.sage,
+                      letterSpacing: 0.4,
                     ),
-                  _MenuRow(
-                    icon: Icons.logout,
-                    label: 'Sign out',
-                    colors: colors,
-                    showDivider: false,
-                    onTap: _handleSignOut,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isAnonymous
+                        ? 'Your account'
+                        : (user?.email ?? 'Your account'),
+                    style: AppTheme.handwritten(size: 27, color: colors.ink),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceBorder,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.person_outline, color: colors.inkFaint),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isAnonymous
+                              ? 'Anonymous account'
+                              : (user?.email ?? ''),
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTheme.handwritten(
+                            size: 15,
+                            color: colors.ink,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          joined != null ? 'Piano · joined $joined' : 'Piano',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            color: colors.inkFaint,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: subscription.isPro
+                  ? _ProCard(
+                      colors: colors,
+                      busy: _busy,
+                      onManage: () => presentCustomerCenter(context),
+                    )
+                  : _FreeCard(
+                      colors: colors,
+                      busy: _busy,
+                      onUpgrade: _handleUpgrade,
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: colors.surfaceBorder, width: 2),
+                ),
+                child: Column(
+                  children: [
+                    _MenuRow(
+                      icon: Icons.refresh,
+                      label: 'Restore purchases',
+                      colors: colors,
+                      showDivider: true,
+                      onTap: _busy ? null : _handleRestore,
+                    ),
+                    if (subscription.isPro)
+                      _MenuRow(
+                        icon: Icons.settings_outlined,
+                        label: 'Manage subscription',
+                        colors: colors,
+                        showDivider: true,
+                        onTap: _busy
+                            ? null
+                            : () => presentCustomerCenter(context),
+                      ),
+                    _MenuRow(
+                      icon: Icons.logout,
+                      label: 'Sign out',
+                      colors: colors,
+                      showDivider: false,
+                      onTap: _handleSignOut,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _ProCard extends StatelessWidget {
-  const _ProCard({required this.colors, required this.busy, required this.onManage});
+  const _ProCard({
+    required this.colors,
+    required this.busy,
+    required this.onManage,
+  });
   final AppColors colors;
   final bool busy;
   final VoidCallback onManage;
@@ -222,18 +262,34 @@ class _ProCard extends StatelessWidget {
         children: [
           Text(
             'YOUR PLAN',
-            style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 11, letterSpacing: 1.1, color: Colors.white.withValues(alpha: 0.7)),
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+              letterSpacing: 1.1,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
           ),
           const SizedBox(height: 8),
-          Text('MusicLab Pro', style: AppTheme.handwritten(size: 22, color: Colors.white)),
+          Text(
+            'MusicLab Pro',
+            style: AppTheme.handwritten(size: 22, color: Colors.white),
+          ),
           const SizedBox(height: 2),
           Text(
             'Thanks for supporting MusicLab',
-            style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: Colors.white.withValues(alpha: 0.75)),
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 13,
+              color: Colors.white.withValues(alpha: 0.75),
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: colors.accentDark),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: colors.accentDark,
+            ),
             onPressed: busy ? null : onManage,
             child: const Text('Manage subscription'),
           ),
@@ -244,7 +300,11 @@ class _ProCard extends StatelessWidget {
 }
 
 class _FreeCard extends StatelessWidget {
-  const _FreeCard({required this.colors, required this.busy, required this.onUpgrade});
+  const _FreeCard({
+    required this.colors,
+    required this.busy,
+    required this.onUpgrade,
+  });
   final AppColors colors;
   final bool busy;
   final VoidCallback onUpgrade;
@@ -263,14 +323,27 @@ class _FreeCard extends StatelessWidget {
         children: [
           Text(
             'YOUR PLAN',
-            style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 11, letterSpacing: 1.1, color: colors.accent),
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+              letterSpacing: 1.1,
+              color: colors.accent,
+            ),
           ),
           const SizedBox(height: 8),
-          Text('Free', style: AppTheme.handwritten(size: 22, color: colors.ink)),
+          Text(
+            'Free',
+            style: AppTheme.handwritten(size: 22, color: colors.ink),
+          ),
           const SizedBox(height: 2),
           Text(
             'Upgrade for unlimited pieces, full analysis, and recording history',
-            style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: colors.inkSoft),
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 13,
+              color: colors.inkSoft,
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton(
@@ -305,7 +378,9 @@ class _MenuRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         decoration: BoxDecoration(
-          border: showDivider ? Border(bottom: BorderSide(color: colors.surfaceBorder)) : null,
+          border: showDivider
+              ? Border(bottom: BorderSide(color: colors.surfaceBorder))
+              : null,
         ),
         child: Row(
           children: [
@@ -322,7 +397,12 @@ class _MenuRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 14, color: colors.ink),
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: colors.ink,
+                ),
               ),
             ),
             Icon(Icons.chevron_right, color: colors.tabInactive),

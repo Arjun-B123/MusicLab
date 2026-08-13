@@ -2,11 +2,11 @@ enum PieceStatus { started, learning, learned, paused }
 
 extension PieceStatusLabel on PieceStatus {
   String get label => switch (this) {
-        PieceStatus.started => 'Started',
-        PieceStatus.learning => 'Learning',
-        PieceStatus.learned => 'Learned',
-        PieceStatus.paused => 'Paused',
-      };
+    PieceStatus.started => 'Started',
+    PieceStatus.learning => 'Learning',
+    PieceStatus.learned => 'Learned',
+    PieceStatus.paused => 'Paused',
+  };
 }
 
 /// A piece the user is (or has) learned — the central unit of the app.
@@ -59,11 +59,11 @@ class Piece {
   /// requires Milestone 6 (performance analysis) and doesn't exist yet.
   /// Swap this out once real per-piece analysis scores exist.
   double get approximateProgress => switch (status) {
-        PieceStatus.started => 0.1,
-        PieceStatus.learning => 0.5,
-        PieceStatus.learned => 1.0,
-        PieceStatus.paused => 0.3,
-      };
+    PieceStatus.started => 0.1,
+    PieceStatus.learning => 0.5,
+    PieceStatus.learned => 1.0,
+    PieceStatus.paused => 0.3,
+  };
 
   factory Piece.fromJson(Map<String, dynamic> json) {
     return Piece(

@@ -45,7 +45,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return _HomeDashboardData(pieces, allRecordings);
   }
 
-  void _refresh() => setState(() => _dataFuture = _load());
+  void _refresh() {
+    setState(() {
+      _dataFuture = _load();
+    });
+  }
 
   Piece? _pieceFor(List<Piece> pieces, String pieceId) {
     for (final p in pieces) {
@@ -59,70 +63,77 @@ class _HomeScreenState extends State<HomeScreen> {
     final colors = context.colors;
 
     return Scaffold(
-      body: FutureBuilder<_HomeDashboardData>(
-        future: _dataFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text("Couldn't load your dashboard: ${snapshot.error}"),
+      body: SafeArea(
+        bottom: false,
+        child: FutureBuilder<_HomeDashboardData>(
+          future: _dataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    "Couldn't load your dashboard: ${snapshot.error}",
+                  ),
+                ),
+              );
+            }
+
+            final data = snapshot.data!;
+            final pieces = data.pieces;
+            // Hero = most recently active piece that isn't finished yet.
+            final heroCandidates =
+                pieces.where((p) => p.status != PieceStatus.learned).toList()
+                  ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+            final hero = heroCandidates.isNotEmpty
+                ? heroCandidates.first
+                : null;
+
+            return RefreshIndicator(
+              onRefresh: () async => _refresh(),
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 16),
+                children: [
+                  _Header(colors: colors),
+                  if (hero != null)
+                    _HeroCard(
+                      piece: hero,
+                      recordings: data.recentRecordings
+                          .where((r) => r.pieceId == hero.id)
+                          .toList(),
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => PieceDetailScreen(piece: hero),
+                          ),
+                        );
+                        _refresh();
+                      },
+                    ),
+                  if (pieces.isNotEmpty)
+                    _YourPieces(pieces: pieces, onChanged: _refresh),
+                  _WeekStrip(recordings: data.recentRecordings),
+                  _RecentMoments(
+                    recordings: data.recentRecordings.take(2).toList(),
+                    pieceFor: (id) => _pieceFor(pieces, id),
+                  ),
+                  if (pieces.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+                      child: Text(
+                        "No pieces yet — head to Library to add the one you're learning.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: colors.inkSoft),
+                      ),
+                    ),
+                ],
               ),
             );
-          }
-
-          final data = snapshot.data!;
-          final pieces = data.pieces;
-          // Hero = most recently active piece that isn't finished yet.
-          final heroCandidates =
-              pieces.where((p) => p.status != PieceStatus.learned).toList()
-                ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-          final hero = heroCandidates.isNotEmpty ? heroCandidates.first : null;
-
-          return RefreshIndicator(
-            onRefresh: () async => _refresh(),
-            child: ListView(
-              padding: const EdgeInsets.only(bottom: 16),
-              children: [
-                _Header(colors: colors),
-                if (hero != null)
-                  _HeroCard(
-                    piece: hero,
-                    recordings: data.recentRecordings
-                        .where((r) => r.pieceId == hero.id)
-                        .toList(),
-                    onTap: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => PieceDetailScreen(piece: hero),
-                        ),
-                      );
-                      _refresh();
-                    },
-                  ),
-                if (pieces.isNotEmpty)
-                  _YourPieces(pieces: pieces, onChanged: _refresh),
-                _WeekStrip(recordings: data.recentRecordings),
-                _RecentMoments(
-                  recordings: data.recentRecordings.take(2).toList(),
-                  pieceFor: (id) => _pieceFor(pieces, id),
-                ),
-                if (pieces.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-                    child: Text(
-                      "No pieces yet — head to Library to add the one you're learning.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: colors.inkSoft),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -150,7 +161,10 @@ class _Header extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text('Ready to practice?', style: AppTheme.handwritten(size: 27, color: colors.ink)),
+          Text(
+            'Ready to practice?',
+            style: AppTheme.handwritten(size: 27, color: colors.ink),
+          ),
         ],
       ),
     );
@@ -208,7 +222,10 @@ class _HeroCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text(piece.title, style: AppTheme.handwritten(size: 23, color: colors.ink)),
+              Text(
+                piece.title,
+                style: AppTheme.handwritten(size: 23, color: colors.ink),
+              ),
               const SizedBox(height: 2),
               DashedUnderline(color: colors.accent, width: 60),
               const SizedBox(height: 8),
@@ -234,7 +251,9 @@ class _HeroCard extends StatelessWidget {
                             ),
                             height: 6,
                             decoration: BoxDecoration(
-                              color: filled ? colors.accent : colors.surfaceBorder,
+                              color: filled
+                                  ? colors.accent
+                                  : colors.surfaceBorder,
                               borderRadius: BorderRadius.circular(3),
                             ),
                           ),
@@ -245,7 +264,11 @@ class _HeroCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     '${recordings.length} recording${recordings.length == 1 ? '' : 's'}',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: colors.inkFaint),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      color: colors.inkFaint,
+                    ),
                   ),
                 ],
               ),
@@ -275,10 +298,13 @@ class _YourPieces extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Your pieces', style: AppTheme.handwritten(size: 17, color: colors.ink)),
+            child: Text(
+              'Your pieces',
+              style: AppTheme.handwritten(size: 17, color: colors.ink),
+            ),
           ),
           SizedBox(
-            height: 130,
+            height: 148,
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
               scrollDirection: Axis.horizontal,
@@ -299,7 +325,10 @@ class _YourPieces extends StatelessWidget {
                   },
                   child: Container(
                     width: 168,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.surface,
                       border: Border.all(color: colors.surfaceBorder, width: 2),
@@ -334,7 +363,10 @@ class _YourPieces extends StatelessWidget {
                           piece.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTheme.handwritten(size: 16, color: colors.ink),
+                          style: AppTheme.handwritten(
+                            size: 16,
+                            color: colors.ink,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -374,7 +406,11 @@ class _WeekStrip extends StatelessWidget {
     final practicedDays = List.generate(7, (i) {
       final day = startOfWeek.add(Duration(days: i));
       return recordings.any((r) {
-        final d = DateTime(r.createdAt.year, r.createdAt.month, r.createdAt.day);
+        final d = DateTime(
+          r.createdAt.year,
+          r.createdAt.month,
+          r.createdAt.day,
+        );
         return d == day;
       });
     });
@@ -382,7 +418,11 @@ class _WeekStrip extends StatelessWidget {
     final daysPracticed = practicedDays.where((p) => p).length;
     final totalSeconds = recordings
         .where((r) {
-          final d = DateTime(r.createdAt.year, r.createdAt.month, r.createdAt.day);
+          final d = DateTime(
+            r.createdAt.year,
+            r.createdAt.month,
+            r.createdAt.day,
+          );
           return !d.isBefore(startOfWeek);
         })
         .fold<int>(0, (sum, r) => sum + (r.durationSeconds ?? 0));
@@ -410,7 +450,11 @@ class _WeekStrip extends StatelessWidget {
                   children: [
                     Text(
                       initials[i],
-                      style: TextStyle(fontFamily: 'Inter', fontSize: 10, color: colors.inkFaint),
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 10,
+                        color: colors.inkFaint,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Container(
@@ -420,7 +464,9 @@ class _WeekStrip extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: practiced ? colors.accent : Colors.transparent,
                         border: Border.all(
-                          color: practiced ? colors.accent : colors.surfaceBorder,
+                          color: practiced
+                              ? colors.accent
+                              : colors.surfaceBorder,
                         ),
                       ),
                     ),
@@ -431,7 +477,11 @@ class _WeekStrip extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               '$daysPracticed day${daysPracticed == 1 ? '' : 's'} this week · $minutes minutes',
-              style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: colors.inkSoft),
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                color: colors.inkSoft,
+              ),
             ),
           ],
         ),
@@ -456,27 +506,36 @@ class _RecentMoments extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Recent moments', style: AppTheme.handwritten(size: 17, color: colors.ink)),
+          Text(
+            'Recent moments',
+            style: AppTheme.handwritten(size: 17, color: colors.ink),
+          ),
           const SizedBox(height: 6),
           for (final recording in recordings)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 2),
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: colors.divider),
-                ),
+                border: Border(bottom: BorderSide(color: colors.divider)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'New recording of ${pieceFor(recording.pieceId)?.title ?? 'a piece'}',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 15, color: colors.ink),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 15,
+                      color: colors.ink,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '${pieceFor(recording.pieceId)?.title ?? ''}  ·  ${_relativeDate(recording.createdAt)}',
-                    style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: colors.inkFaint),
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12,
+                      color: colors.inkFaint,
+                    ),
                   ),
                 ],
               ),
@@ -490,8 +549,12 @@ class _RecentMoments extends StatelessWidget {
 String _relativeDate(DateTime date) {
   final now = DateTime.now();
   final diff = now.difference(date);
-  if (diff.inDays >= 1) return '${diff.inDays} day${diff.inDays == 1 ? '' : 's'} ago';
-  if (diff.inHours >= 1) return '${diff.inHours} hour${diff.inHours == 1 ? '' : 's'} ago';
+  if (diff.inDays >= 1) {
+    return '${diff.inDays} day${diff.inDays == 1 ? '' : 's'} ago';
+  }
+  if (diff.inHours >= 1) {
+    return '${diff.inHours} hour${diff.inHours == 1 ? '' : 's'} ago';
+  }
   if (diff.inMinutes >= 1) return '${diff.inMinutes} min ago';
   return 'just now';
 }

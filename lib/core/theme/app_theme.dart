@@ -100,10 +100,9 @@ class AppTheme {
 
   static ThemeData _build(AppColors c, Brightness brightness) {
     final base = ThemeData(brightness: brightness, useMaterial3: true);
-    final textTheme = GoogleFonts.interTextTheme(base.textTheme).apply(
-      bodyColor: c.ink,
-      displayColor: c.ink,
-    );
+    final textTheme = GoogleFonts.interTextTheme(
+      base.textTheme,
+    ).apply(bodyColor: c.ink, displayColor: c.ink);
 
     return base.copyWith(
       scaffoldBackgroundColor: c.background,

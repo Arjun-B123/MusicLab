@@ -80,81 +80,90 @@ class _JourneyScreenState extends State<JourneyScreen> {
     final colors = context.colors;
 
     return Scaffold(
-      body: FutureBuilder<List<_Moment>>(
-        future: _momentsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text("Couldn't load your journey: ${snapshot.error}"),
-              ),
-            );
-          }
-
-          final moments = snapshot.data ?? [];
-
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 16),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(22, 20, 22, 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'JOURNEY',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 13,
-                        color: colors.sage,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Your musical story',
-                      style: AppTheme.handwritten(size: 27, color: colors.ink),
-                    ),
-                  ],
+      body: SafeArea(
+        bottom: false,
+        child: FutureBuilder<List<_Moment>>(
+          future: _momentsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text("Couldn't load your journey: ${snapshot.error}"),
                 ),
-              ),
-              if (moments.isEmpty)
+              );
+            }
+
+            final moments = snapshot.data ?? [];
+
+            return ListView(
+              padding: const EdgeInsets.only(bottom: 16),
+              children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 40, 22, 20),
-                  child: Text(
-                    'Nothing here yet — add a piece and record yourself to start your story.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: colors.inkSoft),
-                  ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(42, 22, 22, 20),
-                  child: Stack(
+                  padding: const EdgeInsets.fromLTRB(22, 20, 22, 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Positioned(
-                        left: -19,
-                        top: 8,
-                        bottom: 8,
-                        child: Container(width: 3, color: colors.surfaceBorder),
+                      Text(
+                        'JOURNEY',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 13,
+                          color: colors.sage,
+                          letterSpacing: 0.4,
+                        ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (final moment in moments)
-                            _TimelineEntry(moment: moment, colors: colors),
-                        ],
+                      const SizedBox(height: 4),
+                      Text(
+                        'Your musical story',
+                        style: AppTheme.handwritten(
+                          size: 27,
+                          color: colors.ink,
+                        ),
                       ),
                     ],
                   ),
                 ),
-            ],
-          );
-        },
+                if (moments.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(22, 40, 22, 20),
+                    child: Text(
+                      'Nothing here yet — add a piece and record yourself to start your story.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: colors.inkSoft),
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(42, 22, 22, 20),
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          left: -19,
+                          top: 8,
+                          bottom: 8,
+                          child: Container(
+                            width: 3,
+                            color: colors.surfaceBorder,
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final moment in moments)
+                              _TimelineEntry(moment: moment, colors: colors),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -186,7 +195,10 @@ class _TimelineEntry extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: dotColor,
-                border: Border.all(color: dotBorder, width: isRecording ? 0 : 2),
+                border: Border.all(
+                  color: dotBorder,
+                  width: isRecording ? 0 : 2,
+                ),
               ),
               child: Center(
                 child: Container(
@@ -216,7 +228,10 @@ class _TimelineEntry extends StatelessWidget {
               const SizedBox(height: 5),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                  vertical: 13,
+                ),
                 decoration: BoxDecoration(
                   color: colors.surface,
                   borderRadius: BorderRadius.circular(16),

@@ -49,6 +49,19 @@ class MusicLabApp extends StatelessWidget {
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         routerConfig: appRouter,
+        builder: (context, child) {
+          // The design's cards/rings are pixel-tuned for a phone-sized
+          // layout; respect the user's system text-size preference (real
+          // accessibility need) but clamp the extremes so very large or
+          // very small settings don't break card layouts on smaller phones.
+          final clampedScaler = MediaQuery.textScalerOf(
+            context,
+          ).clamp(minScaleFactor: 0.85, maxScaleFactor: 1.3);
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: clampedScaler),
+            child: child!,
+          );
+        },
       ),
     );
   }
