@@ -48,6 +48,11 @@ dependencies:
   # State management
   provider: ^6.1.5
 
+  # Audio recording and playback
+  record: ^5.2.1
+  audioplayers: ^6.2.0
+  path_provider: ^2.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

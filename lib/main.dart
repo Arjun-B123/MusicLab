@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/auth/auth_gate.dart';
 import 'core/config/app_config.dart';
 import 'core/purchases/subscription_status.dart';
 import 'core/router.dart';
@@ -19,6 +20,7 @@ Future<void> main() async {
       url: AppConfig.supabaseUrl,
       publishableKey: AppConfig.supabaseAnonKey,
     );
+    await ensureSignedIn();
   }
 
   final subscriptionStatus = SubscriptionStatus();
