@@ -50,7 +50,9 @@ class AppShell extends StatelessWidget {
               children: List.generate(_items.length, (index) {
                 final item = _items[index];
                 final isActive = index == navigationShell.currentIndex;
-                final color = isActive ? colors.accent : colors.tabInactive;
+                final color = isActive
+                    ? colors.accentOnSurface
+                    : colors.tabInactive;
 
                 return Expanded(
                   child: InkWell(

@@ -20,6 +20,27 @@ class AppColors {
   final Color divider;
   final Color onAccent;
 
+  /// Text sitting directly on the Scaffold background (headers, empty
+  /// states) — distinct from [ink]/[inkSoft]/[inkFaint], which are for text
+  /// on top of [surface] cards. In light mode these are the same color; in
+  /// dark mode [surface] is a saturated orange needing dark espresso text,
+  /// while the plain background needs light cream text instead — using
+  /// [ink] in both places makes background text nearly invisible (dark
+  /// espresso on near-black).
+  final Color onBackground;
+  final Color onBackgroundSoft;
+  final Color onBackgroundFaint;
+
+  /// Accent-colored highlights (active tab, dashed underlines, filled
+  /// progress bars/rings/dots) drawn ON TOP OF a [surface] card. In light
+  /// mode [surface] is white, so [accent] (orange) pops fine and this
+  /// equals [accent]. In dark mode [surface] IS the accent orange — using
+  /// [accent] for a foreground element on a [surface] card is invisible
+  /// (orange-on-orange), so this is [ink] instead there (the same "text on
+  /// orange card" color used elsewhere). Only use [accent] directly for
+  /// elements sitting on the plain [background], never inside a card.
+  final Color accentOnSurface;
+
   const AppColors({
     required this.background,
     required this.surface,
@@ -34,6 +55,10 @@ class AppColors {
     required this.tabInactive,
     required this.divider,
     required this.onAccent,
+    required this.onBackground,
+    required this.onBackgroundSoft,
+    required this.onBackgroundFaint,
+    required this.accentOnSurface,
   });
 
   static const light = AppColors(
@@ -50,6 +75,10 @@ class AppColors {
     tabInactive: Color(0xFFB0A494),
     divider: Color(0x1A3A2B22),
     onAccent: Color(0xFFFFFFFF),
+    onBackground: Color(0xFF3A2B22),
+    onBackgroundSoft: Color(0xFF8A7A6D),
+    onBackgroundFaint: Color(0xFFA3947F),
+    accentOnSurface: Color(0xFFD97A4A),
   );
 
   // Dark theme: card fills use the saturated orange per the handoff (not a
@@ -69,16 +98,12 @@ class AppColors {
     tabInactive: Color(0xFFC9BBA8),
     divider: Color(0x33FFFFFF),
     onAccent: Color(0xFFFFFFFF),
+    onBackground: Color(0xFFF3ECE1),
+    onBackgroundSoft: Color(0xFFC9BBA8),
+    onBackgroundFaint: Color(0xFFA5977F),
+    accentOnSurface: Color(0xFF2B1C10),
   );
 
-  /// Plain-background text (headers, non-card copy) in dark mode is cream,
-  /// not ink — since "ink" in dark mode is the espresso text-on-orange-card
-  /// color. Only used in dark mode; light mode's "ink" already serves both.
-  static const darkOnBackground = Color(0xFFF3ECE1);
-
-  /// Free-plan / neutral card fill in dark mode (Profile) — distinct from
-  /// the orange "surface" used for content cards.
-  static const darkNeutralSurface = Color(0xFF3A3129);
 }
 
 class AppTheme {

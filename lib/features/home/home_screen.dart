@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         "No pieces yet — head to Library to add the one you're learning.",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: colors.inkSoft),
+                        style: TextStyle(color: colors.onBackgroundSoft),
                       ),
                     ),
                 ],
@@ -163,7 +163,7 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Ready to practice?',
-            style: AppTheme.handwritten(size: 27, color: colors.ink),
+            style: AppTheme.handwritten(size: 27, color: colors.onBackground),
           ),
         ],
       ),
@@ -218,7 +218,7 @@ class _HeroCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   fontSize: 11,
                   letterSpacing: 1.1,
-                  color: colors.accent,
+                  color: colors.accentOnSurface,
                 ),
               ),
               const SizedBox(height: 10),
@@ -227,7 +227,7 @@ class _HeroCard extends StatelessWidget {
                 style: AppTheme.handwritten(size: 23, color: colors.ink),
               ),
               const SizedBox(height: 2),
-              DashedUnderline(color: colors.accent, width: 60),
+              DashedUnderline(color: colors.accentOnSurface, width: 60),
               const SizedBox(height: 8),
               Text(
                 '${piece.instrument} · last practiced $lastPracticed',
@@ -252,7 +252,7 @@ class _HeroCard extends StatelessWidget {
                             height: 6,
                             decoration: BoxDecoration(
                               color: filled
-                                  ? colors.accent
+                                  ? colors.accentOnSurface
                                   : colors.surfaceBorder,
                               borderRadius: BorderRadius.circular(3),
                             ),
@@ -300,7 +300,7 @@ class _YourPieces extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               'Your pieces',
-              style: AppTheme.handwritten(size: 17, color: colors.ink),
+              style: AppTheme.handwritten(size: 17, color: colors.onBackground),
             ),
           ),
           SizedBox(
@@ -344,7 +344,7 @@ class _YourPieces extends StatelessWidget {
                               size: 38,
                               strokeWidth: 4,
                               trackColor: colors.surfaceBorder,
-                              progressColor: colors.accent,
+                              progressColor: colors.accentOnSurface,
                             ),
                             const SizedBox(width: 10),
                             Text(
@@ -462,10 +462,12 @@ class _WeekStrip extends StatelessWidget {
                       height: 10,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: practiced ? colors.accent : Colors.transparent,
+                        color: practiced
+                            ? colors.accentOnSurface
+                            : Colors.transparent,
                         border: Border.all(
                           color: practiced
-                              ? colors.accent
+                              ? colors.accentOnSurface
                               : colors.surfaceBorder,
                         ),
                       ),
@@ -508,7 +510,7 @@ class _RecentMoments extends StatelessWidget {
         children: [
           Text(
             'Recent moments',
-            style: AppTheme.handwritten(size: 17, color: colors.ink),
+            style: AppTheme.handwritten(size: 17, color: colors.onBackground),
           ),
           const SizedBox(height: 6),
           for (final recording in recordings)
@@ -525,7 +527,7 @@ class _RecentMoments extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 15,
-                      color: colors.ink,
+                      color: colors.onBackground,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -534,7 +536,7 @@ class _RecentMoments extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 12,
-                      color: colors.inkFaint,
+                      color: colors.onBackgroundFaint,
                     ),
                   ),
                 ],

@@ -121,7 +121,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                         'Your musical story',
                         style: AppTheme.handwritten(
                           size: 27,
-                          color: colors.ink,
+                          color: colors.onBackground,
                         ),
                       ),
                     ],
@@ -133,7 +133,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
                     child: Text(
                       'Nothing here yet — add a piece and record yourself to start your story.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: colors.inkSoft),
+                      style: TextStyle(color: colors.onBackgroundSoft),
                     ),
                   )
                 else

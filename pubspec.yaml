@@ -59,6 +59,13 @@ dependencies:
   # Date formatting
   intl: ^0.19.0
 
+  # Sheet music attachment: image only for now. file_picker/pdfx (for PDF
+  # support) hit unresolved native-build toolchain issues on this project's
+  # AGP/Kotlin versions — dropped rather than continuing to fight them;
+  # revisit PDF support once those packages/toolchain settle.
+  image_picker: ^1.1.2
+  http: ^1.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -66,7 +66,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               ),
               Text(
                 'Add a piece',
-                style: AppTheme.handwritten(size: 22, color: colors.ink),
+                style: AppTheme.handwritten(size: 22, color: colors.onBackground),
               ),
               _FieldLabel('Title', colors),
               _AddPieceField(
@@ -187,7 +187,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                 'Your pieces',
                                 style: AppTheme.handwritten(
                                   size: 27,
-                                  color: colors.ink,
+                                  color: colors.onBackground,
                                 ),
                               ),
                             ],
@@ -208,7 +208,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 13,
-                        color: colors.inkFaint,
+                        color: colors.onBackgroundFaint,
                       ),
                     ),
                   ),
@@ -218,7 +218,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       child: Text(
                         "No pieces yet — tap + Add to add the one you're learning.",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: colors.inkSoft),
+                        style: TextStyle(color: colors.onBackgroundSoft),
                       ),
                     )
                   else
@@ -272,7 +272,7 @@ class _FieldLabel extends StatelessWidget {
           fontWeight: FontWeight.w600,
           fontSize: 12,
           letterSpacing: 0.6,
-          color: colors.inkSoft,
+          color: colors.onBackgroundSoft,
         ),
       ),
     );
@@ -319,7 +319,7 @@ class _AddPieceField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: colors.accent, width: 2),
+            borderSide: BorderSide(color: colors.accentOnSurface, width: 2),
           ),
         ),
       ),
@@ -341,7 +341,7 @@ class _PieceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dotColor = piece.status == PieceStatus.learned
-        ? colors.accent
+        ? colors.accentOnSurface
         : colors.gold;
 
     return InkWell(
@@ -361,7 +361,7 @@ class _PieceRow extends StatelessWidget {
               size: 46,
               strokeWidth: 5,
               trackColor: colors.surfaceBorder,
-              progressColor: colors.accent,
+              progressColor: colors.accentOnSurface,
             ),
             const SizedBox(width: 14),
             Expanded(

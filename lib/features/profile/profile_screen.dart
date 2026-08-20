@@ -127,7 +127,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     isAnonymous
                         ? 'Your account'
                         : (user?.email ?? 'Your account'),
-                    style: AppTheme.handwritten(size: 27, color: colors.ink),
+                    style: AppTheme.handwritten(
+                      size: 27,
+                      color: colors.onBackground,
+                    ),
                   ),
                 ],
               ),
@@ -143,7 +146,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: colors.surfaceBorder,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.person_outline, color: colors.inkFaint),
+                    child: Icon(
+                      Icons.person_outline,
+                      color: colors.onBackgroundFaint,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -157,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: AppTheme.handwritten(
                             size: 15,
-                            color: colors.ink,
+                            color: colors.onBackground,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -167,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 12,
-                            color: colors.inkFaint,
+                            color: colors.onBackgroundFaint,
                           ),
                         ),
                       ],
@@ -328,7 +334,7 @@ class _FreeCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
               fontSize: 11,
               letterSpacing: 1.1,
-              color: colors.accent,
+              color: colors.accentOnSurface,
             ),
           ),
           const SizedBox(height: 8),

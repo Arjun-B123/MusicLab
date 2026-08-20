@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'models/piece.dart';
@@ -49,5 +51,45 @@ class PieceRepository {
 
   Future<void> deletePiece(String pieceId) async {
     await _client.from('pieces').delete().eq('id', pieceId);
+  }
+
+  /// Uploads a sheet music file (PDF or image) and attaches it to the
+  /// piece. Replaces any previously attached sheet music.
+  Future<Piece> attachSheetMusic({
+    required Piece piece,
+    required File file,
+    required String extension,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('No signed-in user — cannot attach sheet music.');
+    }
+
+    final storagePath = '$userId/${piece.id}.$extension';
+    await _client.storage
+        .from('sheet-music')
+        .upload(
+          storagePath,
+          file,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    final row = await _client
+        .from('pieces')
+        .update({'sheet_music_path': storagePath})
+        .eq('id', piece.id)
+        .select()
+        .single();
+
+    return Piece.fromJson(row);
+  }
+
+  /// Sheet music is stored privately, so viewing it needs a short-lived
+  /// signed URL rather than a public one.
+  Future<String> sheetMusicUrl(String storagePath) async {
+    return _client.storage.from('sheet-music').createSignedUrl(
+      storagePath,
+      3600,
+    );
   }
 }

@@ -9,6 +9,7 @@ import 'package:record/record.dart';
 import '../models/piece.dart';
 import '../models/recording.dart';
 import '../recording_repository.dart';
+import '../widgets/sheet_music_section.dart';
 
 class PieceDetailScreen extends StatefulWidget {
   const PieceDetailScreen({super.key, required this.piece});
@@ -24,6 +25,7 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
   final _recorder = AudioRecorder();
   final _player = AudioPlayer();
 
+  late Piece _piece = widget.piece;
   late Future<List<Recording>> _recordingsFuture;
 
   bool _isRecording = false;
@@ -132,14 +134,14 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final piece = widget.piece;
+    final piece = _piece;
 
     return Scaffold(
       appBar: AppBar(title: Text(piece.title)),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -173,8 +175,13 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 16),
               ],
             ),
+          ),
+          SheetMusicSection(
+            piece: piece,
+            onPieceUpdated: (updated) => setState(() => _piece = updated),
           ),
           const Divider(height: 1),
           Expanded(
