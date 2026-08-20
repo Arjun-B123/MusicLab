@@ -31,6 +31,9 @@ class ThemeModeController extends ChangeNotifier {
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefsKey, _mode == ThemeMode.dark ? 'dark' : 'light');
+    await prefs.setString(
+      _prefsKey,
+      _mode == ThemeMode.dark ? 'dark' : 'light',
+    );
   }
 }

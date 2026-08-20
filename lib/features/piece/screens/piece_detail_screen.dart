@@ -137,7 +137,9 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
     final piece = _piece;
 
     return Scaffold(
-      appBar: AppBar(title: Text(piece.title)),
+      appBar: AppBar(
+        title: Text(piece.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
       body: Column(
         children: [
           Padding(

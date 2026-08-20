@@ -42,7 +42,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),
       builder: (sheetContext) {
-        return Padding(
+        // Scrollable so the sheet doesn't overflow on short screens once
+        // the keyboard is up (its content + keyboard can exceed the
+        // available height on smaller phones).
+        return SingleChildScrollView(
           padding: EdgeInsets.only(
             left: 22,
             right: 22,
@@ -66,7 +69,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
               ),
               Text(
                 'Add a piece',
-                style: AppTheme.handwritten(size: 22, color: colors.onBackground),
+                style: AppTheme.handwritten(
+                  size: 22,
+                  color: colors.onBackground,
+                ),
               ),
               _FieldLabel('Title', colors),
               _AddPieceField(

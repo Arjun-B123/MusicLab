@@ -423,8 +423,7 @@ class _ThemeToggleRow extends StatelessWidget {
             ),
             Switch(
               value: isDark,
-              onChanged: (_) =>
-                  controller.toggle(Theme.of(context).brightness),
+              onChanged: (_) => controller.toggle(Theme.of(context).brightness),
               // This row sits on a colors.surface card, and in dark mode
               // colors.accent IS colors.surface (same orange) — using
               // accent here made the whole switch blend into the card.

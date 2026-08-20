@@ -68,8 +68,7 @@ class ProFeaturesIntroScreen extends StatefulWidget {
   const ProFeaturesIntroScreen({super.key});
 
   @override
-  State<ProFeaturesIntroScreen> createState() =>
-      _ProFeaturesIntroScreenState();
+  State<ProFeaturesIntroScreen> createState() => _ProFeaturesIntroScreenState();
 }
 
 class _ProFeaturesIntroScreenState extends State<ProFeaturesIntroScreen> {
@@ -150,9 +149,7 @@ class _ProFeaturesIntroScreenState extends State<ProFeaturesIntroScreen> {
                         width: active ? 20 : 6,
                         height: 6,
                         decoration: BoxDecoration(
-                          color: active
-                              ? colors.accent
-                              : colors.surfaceBorder,
+                          color: active ? colors.accent : colors.surfaceBorder,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       );
@@ -191,39 +188,55 @@ class _FeaturePageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 88,
-            height: 88,
-            decoration: BoxDecoration(
-              color: colors.accent.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
+    // A short screen (small phone in landscape, or large accessibility text
+    // pushing content taller than the viewport) would otherwise overflow a
+    // plain centered Column — scroll instead, while still centering when
+    // everything fits comfortably.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: colors.accent.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(page.icon, size: 40, color: colors.accent),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    page.headline,
+                    textAlign: TextAlign.center,
+                    style: AppTheme.handwritten(
+                      size: 26,
+                      color: colors.onBackground,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    page.body,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 15,
+                      height: 1.5,
+                      color: colors.onBackgroundSoft,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Icon(page.icon, size: 40, color: colors.accent),
           ),
-          const SizedBox(height: 32),
-          Text(
-            page.headline,
-            textAlign: TextAlign.center,
-            style: AppTheme.handwritten(size: 26, color: colors.onBackground),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            page.body,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 15,
-              height: 1.5,
-              color: colors.onBackgroundSoft,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

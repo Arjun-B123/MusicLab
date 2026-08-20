@@ -41,9 +41,9 @@ class _SheetMusicSectionState extends State<SheetMusicSection> {
       widget.onPieceUpdated(updated);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Couldn't attach that file: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Couldn't attach that file: $e")));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

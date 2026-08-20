@@ -87,9 +87,8 @@ class PieceRepository {
   /// Sheet music is stored privately, so viewing it needs a short-lived
   /// signed URL rather than a public one.
   Future<String> sheetMusicUrl(String storagePath) async {
-    return _client.storage.from('sheet-music').createSignedUrl(
-      storagePath,
-      3600,
-    );
+    return _client.storage
+        .from('sheet-music')
+        .createSignedUrl(storagePath, 3600);
   }
 }

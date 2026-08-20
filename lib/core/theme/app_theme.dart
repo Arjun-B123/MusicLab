@@ -103,7 +103,6 @@ class AppColors {
     onBackgroundFaint: Color(0xFFA5977F),
     accentOnSurface: Color(0xFF2B1C10),
   );
-
 }
 
 class AppTheme {

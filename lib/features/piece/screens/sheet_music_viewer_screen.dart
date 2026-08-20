@@ -19,8 +19,7 @@ class SheetMusicViewerScreen extends StatefulWidget {
   final bool isPdf;
 
   @override
-  State<SheetMusicViewerScreen> createState() =>
-      _SheetMusicViewerScreenState();
+  State<SheetMusicViewerScreen> createState() => _SheetMusicViewerScreenState();
 }
 
 class _SheetMusicViewerScreenState extends State<SheetMusicViewerScreen> {
@@ -49,7 +48,7 @@ class _SheetMusicViewerScreenState extends State<SheetMusicViewerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(widget.title),
+        title: Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
       body: widget.isPdf
           ? PdfView(controller: _pdfController!, scrollDirection: Axis.vertical)
