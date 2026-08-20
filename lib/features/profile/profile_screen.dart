@@ -8,6 +8,7 @@ import '../../core/purchases/subscription_status.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/moon_icon.dart';
 import '../../core/theme/theme_mode_controller.dart';
+import '../paywall/screens/pro_features_intro_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,17 +21,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _busy = false;
 
   Future<void> _handleUpgrade() async {
-    setState(() => _busy = true);
-    try {
-      final unlocked = await presentProPaywallIfNeeded(context);
-      if (!mounted) return;
-      if (unlocked) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("You're on MusicLab Pro. Welcome!")),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
+    final unlocked = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => const ProFeaturesIntroScreen(),
+        fullscreenDialog: true,
+      ),
+    );
+    if (!mounted) return;
+    if (unlocked == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("You're on MusicLab Pro. Welcome!")),
+      );
     }
   }
 
