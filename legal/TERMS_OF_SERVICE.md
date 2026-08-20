@@ -14,7 +14,7 @@ You are responsible for keeping your account credentials secure and for all acti
 
 ## 3. Subscriptions and Purchases
 
-MusicLab offers an optional **MusicLab Pro** subscription with additional features. Purchases are processed through Google Play and managed via RevenueCat. Pricing, billing cycles, and cancellation are governed by Google Play's terms — you can manage or cancel your subscription at any time through your Google Play account. Except where required by law or Google Play policy, purchases are non-refundable through us directly.
+MusicLab offers an optional **MusicLab Pro** subscription with additional features. Purchases are processed through your app store and managed via RevenueCat. Pricing, billing cycles, and cancellation are governed by your app store's terms — you can manage or cancel your subscription at any time through your app store account. Except where required by law or app store policy, purchases are non-refundable through us directly.
 
 ## 4. Content You Create
 
@@ -50,4 +50,4 @@ We may update these terms as MusicLab evolves. Continued use of the app after ch
 
 ## 11. Contact Us
 
-Questions about these terms? Contact us at: **sonali.p.jadhav@gmail.com**
+Questions about these terms? Contact us at: **musiclab.customerservice@gmail.com**
