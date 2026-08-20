@@ -39,8 +39,8 @@ dependencies:
   supabase_flutter: ^2.8.0
 
   # Monetization: RevenueCat, required for Shipaton eligibility
-  purchases_flutter: ^8.5.0
-  purchases_ui_flutter: ^8.5.0
+  purchases_flutter: ^10.9.1
+  purchases_ui_flutter: ^10.9.1
 
   # Navigation
   go_router: ^14.6.2
@@ -59,11 +59,14 @@ dependencies:
   # Date formatting
   intl: ^0.19.0
 
-  # Sheet music attachment: image only for now. file_picker/pdfx (for PDF
-  # support) hit unresolved native-build toolchain issues on this project's
-  # AGP/Kotlin versions — dropped rather than continuing to fight them;
-  # revisit PDF support once those packages/toolchain settle.
+  # Sheet music attachment: photo (image_picker, incl. camera capture) or
+  # PDF (file_picker + pdfx for viewing). file_picker's Kotlin build issue
+  # was fixed by bumping the Kotlin Gradle Plugin (see android/settings.gradle.kts);
+  # pdfx's native pdfium build only fails on the Windows target (a local
+  # preview convenience, not a shipping platform) — Android/iOS are fine.
   image_picker: ^1.1.2
+  file_picker: ^11.0.3
+  pdfx: ^2.9.1
   http: ^1.2.2
 
   # Persisting the manual dark/light mode override
