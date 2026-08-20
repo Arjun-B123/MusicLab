@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/purchases/paywall_helpers.dart';
 import '../../core/purchases/subscription_status.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/moon_icon.dart';
+import '../../core/theme/theme_mode_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -206,6 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
+                    const _ThemeToggleRow(),
                     _MenuRow(
                       icon: Icons.refresh,
                       label: 'Restore purchases',
@@ -357,6 +360,80 @@ class _FreeCard extends StatelessWidget {
             child: const Text('Upgrade to Pro →'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeToggleRow extends StatelessWidget {
+  const _ThemeToggleRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = context.watch<ThemeModeController>();
+
+    return InkWell(
+      onTap: () => controller.toggle(Theme.of(context).brightness),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: colors.surfaceBorder)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: colors.background,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                transitionBuilder: (child, animation) => RotationTransition(
+                  turns: animation,
+                  child: ScaleTransition(scale: animation, child: child),
+                ),
+                child: KeyedSubtree(
+                  key: ValueKey(isDark),
+                  child: isDark
+                      ? MoonIcon(size: 18, color: colors.accent)
+                      : Icon(
+                          Icons.wb_sunny_rounded,
+                          size: 18,
+                          color: colors.accent,
+                        ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                isDark ? 'Dark mode' : 'Light mode',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: colors.ink,
+                ),
+              ),
+            ),
+            Switch(
+              value: isDark,
+              onChanged: (_) =>
+                  controller.toggle(Theme.of(context).brightness),
+              // This row sits on a colors.surface card, and in dark mode
+              // colors.accent IS colors.surface (same orange) — using
+              // accent here made the whole switch blend into the card.
+              // accentOnSurface is the contrasting color for exactly this
+              // situation (see AppColors doc comment).
+              activeThumbColor: colors.accentOnSurface,
+              activeTrackColor: colors.accentOnSurface.withValues(alpha: 0.4),
+            ),
+          ],
+        ),
       ),
     );
   }

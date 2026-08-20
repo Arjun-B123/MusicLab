@@ -66,6 +66,9 @@ dependencies:
   image_picker: ^1.1.2
   http: ^1.2.2
 
+  # Persisting the manual dark/light mode override
+  shared_preferences: ^2.3.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
