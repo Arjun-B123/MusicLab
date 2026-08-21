@@ -37,7 +37,10 @@ async def analyze(audio: UploadFile) -> JSONResponse:
         tmp.write(await audio.read())
         tmp.flush()
 
-        _, _, note_events = predict(tmp.name, ICASSP_2022_MODEL_PATH)
+        try:
+            _, _, note_events = predict(tmp.name, ICASSP_2022_MODEL_PATH)
+        except Exception as exc:  # surface the real cause instead of a bare 500
+            raise HTTPException(500, f"Analysis failed: {exc}") from exc
 
     notes = [
         {
