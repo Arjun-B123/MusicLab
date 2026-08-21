@@ -55,28 +55,14 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
 
   String _timingNote(ComparisonResult result) {
     const base = 'How closely this take matched your reference take';
-    final notes = <String>[];
 
     final tempoPercent = ((result.tempoRatio - 1) * 100).round();
-    if (tempoPercent.abs() >= 5) {
-      notes.add(
-        tempoPercent > 0
-            ? 'played about $tempoPercent% slower overall'
-            : 'played about ${tempoPercent.abs()}% faster overall',
-      );
-    }
+    if (tempoPercent.abs() < 5) return '$base.';
 
-    if (result.appliedOffsetSeconds.abs() >= 0.3) {
-      final secs = result.appliedOffsetSeconds.abs().toStringAsFixed(1);
-      notes.add(
-        result.appliedOffsetSeconds > 0
-            ? 'started ${secs}s late'
-            : 'started ${secs}s early',
-      );
-    }
-
-    if (notes.isEmpty) return '$base.';
-    return '$base (${notes.join(', ')}) — matching still lines up by note order, not the clock.';
+    final tempoDescription = tempoPercent > 0
+        ? 'played about $tempoPercent% slower overall'
+        : 'played about ${tempoPercent.abs()}% faster overall';
+    return '$base ($tempoDescription).';
   }
 
   String _formatTime(double seconds) {
