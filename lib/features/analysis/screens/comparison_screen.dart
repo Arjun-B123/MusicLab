@@ -5,6 +5,7 @@ import '../../piece/models/recording.dart';
 import '../analysis_repository.dart';
 import '../models/comparison_result.dart';
 import '../models/note_event.dart';
+import '../note_names.dart';
 import '../take_comparator.dart';
 
 /// Compares two takes of the same piece and shows where the newer one
@@ -142,23 +143,45 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: colors.surfaceBorder, width: 2),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.timer_outlined,
-                          color: colors.accentOnSurface,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.timer_outlined,
+                              color: colors.accentOnSurface,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                '${_formatTime(spot.startTime)} – ${_formatTime(spot.endTime)}',
+                                style: TextStyle(color: colors.ink),
+                              ),
+                            ),
+                            Text(
+                              '${(spot.score * 100).round()}%',
+                              style: TextStyle(color: colors.onBackgroundSoft),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            '${_formatTime(spot.startTime)} – ${_formatTime(spot.endTime)}',
-                            style: TextStyle(color: colors.ink),
+                        if (spot.noteDiffs.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          ...spot.noteDiffs.map(
+                            (diff) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              child: Text(
+                                diff.status == NoteDiffStatus.missed
+                                    ? 'Expected ${midiToNoteName(diff.expectedPitch)} at ${_formatTime(diff.time)} — not played'
+                                    : 'Expected ${midiToNoteName(diff.expectedPitch)}, played ${midiToNoteName(diff.playedPitch!)} at ${_formatTime(diff.time)}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: colors.onBackgroundSoft,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${(spot.score * 100).round()}%',
-                          style: TextStyle(color: colors.onBackgroundSoft),
-                        ),
+                        ],
                       ],
                     ),
                   ),

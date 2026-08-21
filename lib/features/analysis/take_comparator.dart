@@ -8,8 +8,9 @@ import 'models/note_event.dart';
 /// Walks the reference take in fixed-length windows ("bars") and, for each
 /// window, checks how many reference notes were matched by a practice note
 /// at roughly the same pitch and time. Windows with poor matches become
-/// weak spots. This is a heuristic, not ground-truth music analysis — it
-/// needs no sheet music, just two recordings.
+/// weak spots, each carrying an expected-vs-played breakdown per note.
+/// This is a heuristic, not ground-truth music analysis — it needs no
+/// sheet music, just two recordings.
 class TakeComparator {
   const TakeComparator({
     this.windowSeconds = 2.0,
@@ -56,12 +57,44 @@ class TakeComparator {
 
       var matched = 0;
       var timingErrorTotal = 0.0;
+      final diffs = <NoteDiff>[];
 
       for (final refNote in refNotes) {
-        final match = _bestMatch(refNote, practice);
-        if (match == null) continue;
-        matched++;
-        timingErrorTotal += (match.startTime - refNote.startTime).abs();
+        final nearest = _nearestByTime(refNote, practice);
+
+        if (nearest == null) {
+          diffs.add(
+            NoteDiff(
+              time: refNote.startTime,
+              expectedPitch: refNote.pitch,
+              status: NoteDiffStatus.missed,
+            ),
+          );
+          continue;
+        }
+
+        final pitchDiff = (nearest.pitch - refNote.pitch).abs();
+        if (pitchDiff <= pitchTolerance) {
+          matched++;
+          timingErrorTotal += (nearest.startTime - refNote.startTime).abs();
+          diffs.add(
+            NoteDiff(
+              time: refNote.startTime,
+              expectedPitch: refNote.pitch,
+              playedPitch: nearest.pitch,
+              status: NoteDiffStatus.matched,
+            ),
+          );
+        } else {
+          diffs.add(
+            NoteDiff(
+              time: refNote.startTime,
+              expectedPitch: refNote.pitch,
+              playedPitch: nearest.pitch,
+              status: NoteDiffStatus.wrongPitch,
+            ),
+          );
+        }
       }
 
       final refCount = refNotes.length;
@@ -83,6 +116,9 @@ class TakeComparator {
             startTime: windowStart,
             endTime: windowEnd,
             score: windowScore,
+            noteDiffs: diffs
+                .where((d) => d.status != NoteDiffStatus.matched)
+                .toList(),
           ),
         );
       }
@@ -98,14 +134,14 @@ class TakeComparator {
     );
   }
 
-  NoteEvent? _bestMatch(NoteEvent refNote, List<NoteEvent> practice) {
+  /// The practice note closest in time to a reference note, within
+  /// [timeTolerance], regardless of pitch — used to report what was
+  /// actually played even when it was the wrong note.
+  NoteEvent? _nearestByTime(NoteEvent refNote, List<NoteEvent> practice) {
     NoteEvent? best;
     double bestError = double.infinity;
 
     for (final candidate in practice) {
-      final pitchDiff = (candidate.pitch - refNote.pitch).abs();
-      if (pitchDiff > pitchTolerance) continue;
-
       final timeDiff = (candidate.startTime - refNote.startTime).abs();
       if (timeDiff > timeTolerance) continue;
 
@@ -132,6 +168,7 @@ class TakeComparator {
           startTime: current.startTime,
           endTime: next.endTime,
           score: (current.score + next.score) / 2,
+          noteDiffs: [...current.noteDiffs, ...next.noteDiffs],
         );
       } else {
         merged.add(current);
