@@ -1,5 +1,6 @@
 import 'models/comparison_result.dart';
 import 'models/note_event.dart';
+import 'tempo_estimator.dart';
 
 class _AlignedNote {
   const _AlignedNote({
@@ -113,6 +114,8 @@ class TakeComparator {
       weakSpots: _mergeAdjacent(rawWeakSpots),
       appliedOffsetSeconds: offset,
       tempoRatio: tempoRatio,
+      referenceBpm: estimateBpm(sortedReference),
+      practiceBpm: estimateBpm(sortedPractice),
     );
   }
 

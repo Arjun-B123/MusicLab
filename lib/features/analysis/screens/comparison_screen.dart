@@ -56,13 +56,12 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
   String _timingNote(ComparisonResult result) {
     const base = 'How closely this take matched your reference take';
 
-    final tempoPercent = ((result.tempoRatio - 1) * 100).round();
-    if (tempoPercent.abs() < 5) return '$base.';
+    final refBpm = result.referenceBpm;
+    final practiceBpm = result.practiceBpm;
+    if (refBpm == null || practiceBpm == null) return '$base.';
+    if ((refBpm - practiceBpm).abs() < 3) return '$base.';
 
-    final tempoDescription = tempoPercent > 0
-        ? 'played about $tempoPercent% slower overall'
-        : 'played about ${tempoPercent.abs()}% faster overall';
-    return '$base ($tempoDescription).';
+    return '$base (reference ≈${refBpm.round()} BPM, this take ≈${practiceBpm.round()} BPM).';
   }
 
   String _formatTime(double seconds) {

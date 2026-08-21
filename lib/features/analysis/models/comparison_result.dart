@@ -57,12 +57,19 @@ class ComparisonResult {
     required this.weakSpots,
     this.appliedOffsetSeconds = 0,
     this.tempoRatio = 1.0,
+    this.referenceBpm,
+    this.practiceBpm,
   });
 
   /// 0.0-1.0 across the whole take.
   final double overallScore;
 
   final List<WeakSpot> weakSpots;
+
+  /// Estimated tempo of each take, in beats per minute. Null when there
+  /// weren't enough notes to estimate from.
+  final double? referenceBpm;
+  final double? practiceBpm;
 
   /// How many seconds later (positive) or earlier (negative) the practice
   /// take started, estimated from matched notes — shown for context, not
