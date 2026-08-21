@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
+import '../../analysis/screens/comparison_screen.dart';
 import '../models/piece.dart';
 import '../models/recording.dart';
 import '../recording_repository.dart';
@@ -210,8 +211,25 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
                 }
 
                 return ListView.builder(
-                  itemCount: recordings.length,
+                  itemCount: recordings.length + (recordings.length >= 2 ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index == recordings.length) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ComparisonScreen(
+                                reference: recordings[1],
+                                practice: recordings[0],
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(Icons.compare_arrows),
+                          label: const Text('Compare latest two takes'),
+                        ),
+                      );
+                    }
                     final recording = recordings[index];
                     final isPlaying = _playingRecordingId == recording.id;
                     return ListTile(
