@@ -72,6 +72,11 @@ dependencies:
   # Persisting the manual dark/light mode override
   shared_preferences: ^2.3.3
 
+  # Opens an external sheet-music search when a piece has neither sheet
+  # music nor a reference performance yet (e.g. learned from a YouTube
+  # tutorial) — a search-link suggestion, not audio extraction.
+  url_launcher: ^6.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

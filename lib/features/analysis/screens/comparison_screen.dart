@@ -144,7 +144,10 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.timer_outlined, color: colors.accentOnSurface),
+                        Icon(
+                          Icons.timer_outlined,
+                          color: colors.accentOnSurface,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(

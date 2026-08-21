@@ -29,6 +29,11 @@ class Piece {
   final String? referenceDataPath;
   final String? referenceDataType;
 
+  /// The recording marked as this piece's reference performance — what new
+  /// takes are compared against. Set by recording a correct performance
+  /// once and marking it as the reference (see AnalysisRepository).
+  final String? referenceRecordingId;
+
   final bool isCurated;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -46,6 +51,7 @@ class Piece {
     this.sheetMusicPath,
     this.referenceDataPath,
     this.referenceDataType,
+    this.referenceRecordingId,
   });
 
   /// True once a piece has structured note data attached — the falling-note
@@ -76,6 +82,7 @@ class Piece {
       sheetMusicPath: json['sheet_music_path'] as String?,
       referenceDataPath: json['reference_data_path'] as String?,
       referenceDataType: json['reference_data_type'] as String?,
+      referenceRecordingId: json['reference_recording_id'] as String?,
       isCurated: json['is_curated'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),

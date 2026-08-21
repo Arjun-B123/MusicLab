@@ -18,6 +18,15 @@ class RecordingRepository {
         .toList();
   }
 
+  Future<Recording> fetchById(String recordingId) async {
+    final row = await _client
+        .from('recordings')
+        .select()
+        .eq('id', recordingId)
+        .single();
+    return Recording.fromJson(row);
+  }
+
   Future<Recording> uploadRecording({
     required String pieceId,
     required File audioFile,

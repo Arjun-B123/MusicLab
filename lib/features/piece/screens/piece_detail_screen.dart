@@ -6,9 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
+import '../../analysis/analysis_repository.dart';
 import '../../analysis/screens/comparison_screen.dart';
+import '../../analysis/screens/edit_reference_notes_screen.dart';
 import '../models/piece.dart';
 import '../models/recording.dart';
+import '../piece_repository.dart';
 import '../recording_repository.dart';
 import '../widgets/sheet_music_section.dart';
 
@@ -23,6 +26,8 @@ class PieceDetailScreen extends StatefulWidget {
 
 class _PieceDetailScreenState extends State<PieceDetailScreen> {
   final _repository = RecordingRepository();
+  final _pieceRepository = PieceRepository();
+  final _analysisRepository = AnalysisRepository();
   final _recorder = AudioRecorder();
   final _player = AudioPlayer();
 
@@ -34,6 +39,7 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
   Timer? _tickTimer;
   Duration _elapsed = Duration.zero;
   String? _playingRecordingId;
+  String? _busyRecordingId;
 
   @override
   void initState() {
@@ -127,6 +133,67 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
     });
   }
 
+  Future<void> _setAsReference(Recording recording) async {
+    setState(() => _busyRecordingId = recording.id);
+    try {
+      var notes = await _analysisRepository.fetchExisting(recording.id);
+      notes ??= await _analysisRepository.analyze(recording);
+
+      if (!mounted) return;
+      final saved = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => EditReferenceNotesScreen(
+            recordingId: recording.id,
+            initialNotes: notes!,
+          ),
+        ),
+      );
+
+      if (saved != true) return;
+
+      final updated = await _pieceRepository.setReferenceRecording(
+        _piece.id,
+        recording.id,
+      );
+      if (!mounted) return;
+      setState(() => _piece = updated);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Set as this piece\'s reference.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Couldn't set reference: $e")));
+    } finally {
+      if (mounted) setState(() => _busyRecordingId = null);
+    }
+  }
+
+  Future<void> _compareToReference() async {
+    final referenceId = _piece.referenceRecordingId;
+    if (referenceId == null) return;
+
+    final recordings = await _recordingsFuture;
+    final practice = recordings.firstWhere(
+      (r) => r.id != referenceId,
+      orElse: () => recordings.first,
+    );
+
+    final reference = recordings.firstWhere(
+      (r) => r.id == referenceId,
+      orElse: () => throw StateError('Reference recording not found'),
+    );
+
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ComparisonScreen(reference: reference, practice: practice),
+      ),
+    );
+  }
+
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
@@ -210,28 +277,44 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
                   );
                 }
 
+                final referenceId = _piece.referenceRecordingId;
+                final hasUsableReference =
+                    referenceId != null &&
+                    recordings.any((r) => r.id == referenceId) &&
+                    recordings.length >= 2;
+                final showCompareButton =
+                    hasUsableReference || recordings.length >= 2;
+
                 return ListView.builder(
-                  itemCount: recordings.length + (recordings.length >= 2 ? 1 : 0),
+                  itemCount: recordings.length + (showCompareButton ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == recordings.length) {
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                         child: OutlinedButton.icon(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ComparisonScreen(
-                                reference: recordings[1],
-                                practice: recordings[0],
-                              ),
-                            ),
-                          ),
+                          onPressed: hasUsableReference
+                              ? _compareToReference
+                              : () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ComparisonScreen(
+                                      reference: recordings[1],
+                                      practice: recordings[0],
+                                    ),
+                                  ),
+                                ),
                           icon: const Icon(Icons.compare_arrows),
-                          label: const Text('Compare latest two takes'),
+                          label: Text(
+                            hasUsableReference
+                                ? 'Compare to reference take'
+                                : 'Compare latest two takes',
+                          ),
                         ),
                       );
                     }
                     final recording = recordings[index];
                     final isPlaying = _playingRecordingId == recording.id;
+                    final isReference = recording.id == referenceId;
+                    final isBusy = _busyRecordingId == recording.id;
                     return ListTile(
                       leading: IconButton(
                         icon: Icon(
@@ -248,6 +331,21 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
                               )
                             : 'Recording',
                       ),
+                      trailing: isBusy
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              icon: Icon(
+                                isReference ? Icons.star : Icons.star_border,
+                              ),
+                              tooltip: isReference
+                                  ? 'Reference take — tap to edit its notes'
+                                  : 'Set as reference take',
+                              onPressed: () => _setAsReference(recording),
+                            ),
                       subtitle: Text(
                         '${recording.createdAt.month}/${recording.createdAt.day}/${recording.createdAt.year}',
                       ),

@@ -71,6 +71,21 @@ class AnalysisRepository {
     return notes;
   }
 
+  /// Overwrites the cached notes for a recording — used after the user
+  /// corrects a reference performance's auto-detected notes by hand.
+  Future<void> saveNotes(String recordingId, List<NoteEvent> notes) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('No signed-in user — cannot save analysis.');
+    }
+
+    await _client.from('recording_analyses').upsert({
+      'recording_id': recordingId,
+      'owner_id': userId,
+      'notes': notes.map((n) => n.toJson()).toList(),
+    }, onConflict: 'recording_id');
+  }
+
   List<NoteEvent> _parseNotes(dynamic raw) {
     return (raw as List)
         .map((n) => NoteEvent.fromJson(n as Map<String, dynamic>))

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../models/piece.dart';
@@ -103,6 +104,12 @@ class _SheetMusicSectionState extends State<SheetMusicSection> {
     }
   }
 
+  Future<void> _searchForSheetMusic() async {
+    final query = Uri.encodeComponent('${widget.piece.title} sheet music');
+    final uri = Uri.parse('https://www.google.com/search?q=$query');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   Future<void> _view() async {
     final path = widget.piece.sheetMusicPath;
     if (path == null) return;
@@ -161,7 +168,7 @@ class _SheetMusicSectionState extends State<SheetMusicSection> {
                 ),
               ],
             )
-          else
+          else ...[
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
@@ -170,6 +177,22 @@ class _SheetMusicSectionState extends State<SheetMusicSection> {
                 label: Text(_busy ? 'Uploading…' : 'Attach sheet music'),
               ),
             ),
+            if (widget.piece.referenceRecordingId == null) ...[
+              const SizedBox(height: 8),
+              Text(
+                "Learning from a video or don't have sheet music? Record a "
+                'correct take below and set it as this piece\'s reference — '
+                "that's what your takes get compared against.",
+                style: TextStyle(fontSize: 13, color: colors.onBackgroundSoft),
+              ),
+              const SizedBox(height: 4),
+              TextButton.icon(
+                onPressed: _searchForSheetMusic,
+                icon: const Icon(Icons.search, size: 18),
+                label: const Text('Search for sheet music online'),
+              ),
+            ],
+          ],
         ],
       ),
     );

@@ -53,6 +53,21 @@ class PieceRepository {
     await _client.from('pieces').delete().eq('id', pieceId);
   }
 
+  /// Marks a recording as this piece's reference performance — the
+  /// standard every future take gets compared against.
+  Future<Piece> setReferenceRecording(
+    String pieceId,
+    String recordingId,
+  ) async {
+    final row = await _client
+        .from('pieces')
+        .update({'reference_recording_id': recordingId})
+        .eq('id', pieceId)
+        .select()
+        .single();
+    return Piece.fromJson(row);
+  }
+
   /// Uploads a sheet music file (PDF or image) and attaches it to the
   /// piece. Replaces any previously attached sheet music.
   Future<Piece> attachSheetMusic({

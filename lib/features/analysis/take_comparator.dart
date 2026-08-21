@@ -66,15 +66,24 @@ class TakeComparator {
 
       final refCount = refNotes.length;
       final matchFraction = matched / refCount;
-      final avgTimingError = matched == 0 ? timeTolerance : timingErrorTotal / matched;
-      final timingAccuracy = (1 - (avgTimingError / timeTolerance)).clamp(0.0, 1.0);
+      final avgTimingError = matched == 0
+          ? timeTolerance
+          : timingErrorTotal / matched;
+      final timingAccuracy = (1 - (avgTimingError / timeTolerance)).clamp(
+        0.0,
+        1.0,
+      );
 
       final windowScore = (matchFraction * 0.7) + (timingAccuracy * 0.3);
       windowScores.add(windowScore);
 
       if (windowScore < weakSpotThreshold) {
         rawWeakSpots.add(
-          WeakSpot(startTime: windowStart, endTime: windowEnd, score: windowScore),
+          WeakSpot(
+            startTime: windowStart,
+            endTime: windowEnd,
+            score: windowScore,
+          ),
         );
       }
     }
