@@ -32,6 +32,16 @@ double? estimateBpm(List<NoteEvent> notes) {
   return bpm;
 }
 
+/// Which bar (1-indexed) a moment in the take falls in, assuming a
+/// standard 4/4 time signature — the app has no way to know the real
+/// time signature, so this is an approximation based on the estimated
+/// tempo.
+int barNumberForTime(double seconds, double bpm, {int beatsPerBar = 4}) {
+  final barLength = (60 / bpm) * beatsPerBar;
+  if (barLength <= 0) return 1;
+  return (seconds / barLength).floor() + 1;
+}
+
 /// The traditional Italian tempo marking closest to a BPM value.
 String tempoMarking(double bpm) {
   if (bpm < 60) return 'Largo';

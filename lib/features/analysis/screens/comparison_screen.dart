@@ -73,6 +73,23 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     return '$minutes:$secs';
   }
 
+  /// "Bar 5" when a tempo estimate is available (assumes 4/4), otherwise
+  /// falls back to a timestamp like "0:12".
+  String _formatPosition(double seconds, ComparisonResult result) {
+    final bpm = result.referenceBpm;
+    if (bpm == null) return _formatTime(seconds);
+    return 'Bar ${barNumberForTime(seconds, bpm)}';
+  }
+
+  String _formatRange(double start, double end, ComparisonResult result) {
+    final bpm = result.referenceBpm;
+    if (bpm == null) return '${_formatTime(start)} – ${_formatTime(end)}';
+
+    final startBar = barNumberForTime(start, bpm);
+    final endBar = barNumberForTime(end, bpm);
+    return startBar == endBar ? 'Bar $startBar' : 'Bars $startBar–$endBar';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -168,7 +185,11 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                '${_formatTime(spot.startTime)} – ${_formatTime(spot.endTime)}',
+                                _formatRange(
+                                  spot.startTime,
+                                  spot.endTime,
+                                  result,
+                                ),
                                 style: TextStyle(color: colors.ink),
                               ),
                             ),
@@ -185,8 +206,8 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 2),
                               child: Text(
                                 diff.status == NoteDiffStatus.missed
-                                    ? 'Expected ${midiToNoteName(diff.expectedPitch)} at ${_formatTime(diff.time)} — not played'
-                                    : 'Expected ${midiToNoteName(diff.expectedPitch)}, played ${midiToNoteName(diff.playedPitch!)} at ${_formatTime(diff.time)}',
+                                    ? 'Expected ${midiToNoteName(diff.expectedPitch)} at ${_formatPosition(diff.time, result)} — not played'
+                                    : 'Expected ${midiToNoteName(diff.expectedPitch)}, played ${midiToNoteName(diff.playedPitch!)} at ${_formatPosition(diff.time, result)}',
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: colors.onBackgroundSoft,
