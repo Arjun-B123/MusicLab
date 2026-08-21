@@ -7,6 +7,7 @@ import '../models/comparison_result.dart';
 import '../models/note_event.dart';
 import '../note_names.dart';
 import '../take_comparator.dart';
+import '../tempo_estimator.dart';
 
 /// Compares two takes of the same piece and shows where the newer one
 /// diverged from the reference — no sheet music needed, just two
@@ -61,7 +62,8 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     if (refBpm == null || practiceBpm == null) return '$base.';
     if ((refBpm - practiceBpm).abs() < 3) return '$base.';
 
-    return '$base (reference ≈${refBpm.round()} BPM, this take ≈${practiceBpm.round()} BPM).';
+    return '$base (reference ≈${refBpm.round()} BPM · ${tempoMarking(refBpm)}, '
+        'this take ≈${practiceBpm.round()} BPM · ${tempoMarking(practiceBpm)}).';
   }
 
   String _formatTime(double seconds) {
