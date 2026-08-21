@@ -34,6 +34,12 @@ class Piece {
   /// once and marking it as the reference (see AnalysisRepository).
   final String? referenceRecordingId;
 
+  /// e.g. "4/4", "3/4", "6/8" — used to convert note timestamps into bar
+  /// numbers on the comparison screen. Auto-detected from sheet music when
+  /// possible (best-effort, can be wrong), always user-editable. Defaults
+  /// to 4/4, the most common signature.
+  final String timeSignature;
+
   final bool isCurated;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -52,6 +58,7 @@ class Piece {
     this.referenceDataPath,
     this.referenceDataType,
     this.referenceRecordingId,
+    this.timeSignature = '4/4',
   });
 
   /// True once a piece has structured note data attached — the falling-note
@@ -59,6 +66,19 @@ class Piece {
   /// Pieces without it still get sheet music display, recording, and
   /// rhythm-only feedback.
   bool get hasTutorialData => referenceDataPath != null;
+
+  /// Parses [timeSignature] (e.g. "6/8") into (beats, beatUnit). Falls
+  /// back to 4/4 if it's somehow malformed.
+  (int, int) get timeSignatureParts {
+    final parts = timeSignature.split('/');
+    if (parts.length != 2) return (4, 4);
+    final beats = int.tryParse(parts[0]);
+    final unit = int.tryParse(parts[1]);
+    if (beats == null || unit == null || beats <= 0 || unit <= 0) {
+      return (4, 4);
+    }
+    return (beats, unit);
+  }
 
   /// A rough stand-in for "% mastered", used to drive the progress rings in
   /// the UI. This is NOT a real measurement — actual mastery scoring
@@ -83,6 +103,7 @@ class Piece {
       referenceDataPath: json['reference_data_path'] as String?,
       referenceDataType: json['reference_data_type'] as String?,
       referenceRecordingId: json['reference_recording_id'] as String?,
+      timeSignature: json['time_signature'] as String? ?? '4/4',
       isCurated: json['is_curated'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),

@@ -80,6 +80,16 @@ class PieceRepository {
     return Piece.fromJson(row);
   }
 
+  Future<Piece> setTimeSignature(String pieceId, String timeSignature) async {
+    final row = await _client
+        .from('pieces')
+        .update({'time_signature': timeSignature})
+        .eq('id', pieceId)
+        .select()
+        .single();
+    return Piece.fromJson(row);
+  }
+
   /// Uploads a sheet music file (PDF or image) and attaches it to the
   /// piece. Replaces any previously attached sheet music.
   Future<Piece> attachSheetMusic({

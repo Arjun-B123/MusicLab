@@ -188,8 +188,11 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) =>
-            ComparisonScreen(reference: reference, practice: practice),
+        builder: (_) => ComparisonScreen(
+          piece: _piece,
+          reference: reference,
+          practice: practice,
+        ),
       ),
     );
   }
@@ -387,6 +390,7 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
                             : () => Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (_) => ComparisonScreen(
+                                    piece: _piece,
                                     reference: recordings[1],
                                     practice: recordings[0],
                                   ),

@@ -32,12 +32,18 @@ double? estimateBpm(List<NoteEvent> notes) {
   return bpm;
 }
 
-/// Which bar (1-indexed) a moment in the take falls in, assuming a
-/// standard 4/4 time signature — the app has no way to know the real
-/// time signature, so this is an approximation based on the estimated
-/// tempo.
-int barNumberForTime(double seconds, double bpm, {int beatsPerBar = 4}) {
-  final barLength = (60 / bpm) * beatsPerBar;
+/// Which bar (1-indexed) a moment in the take falls in, given the
+/// estimated tempo and the piece's time signature (beats / beat unit,
+/// e.g. 4/4 -> (4, 4), 6/8 -> (6, 8)). BPM is assumed to count quarter
+/// notes, the standard convention.
+int barNumberForTime(
+  double seconds,
+  double bpm, {
+  int beats = 4,
+  int beatUnit = 4,
+}) {
+  final quarterNoteSeconds = 60 / bpm;
+  final barLength = quarterNoteSeconds * beats * (4 / beatUnit);
   if (barLength <= 0) return 1;
   return (seconds / barLength).floor() + 1;
 }

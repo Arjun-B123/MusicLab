@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -6,9 +7,20 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../analysis/omr_repository.dart';
 import '../models/piece.dart';
 import '../piece_repository.dart';
 import '../screens/sheet_music_viewer_screen.dart';
+
+const _commonTimeSignatures = [
+  '4/4',
+  '3/4',
+  '2/4',
+  '2/2',
+  '6/8',
+  '9/8',
+  '12/8',
+];
 
 class SheetMusicSection extends StatefulWidget {
   const SheetMusicSection({
@@ -26,8 +38,10 @@ class SheetMusicSection extends StatefulWidget {
 
 class _SheetMusicSectionState extends State<SheetMusicSection> {
   final _repository = PieceRepository();
+  final _omrRepository = OmrRepository();
   final _imagePicker = ImagePicker();
   bool _busy = false;
+  bool _detectingTimeSignature = false;
 
   bool get _isPdf => widget.piece.sheetMusicPath?.endsWith('.pdf') ?? false;
 
@@ -40,6 +54,7 @@ class _SheetMusicSectionState extends State<SheetMusicSection> {
         extension: extension,
       );
       widget.onPieceUpdated(updated);
+      unawaited(_detectAndConfirmTimeSignature(file, extension));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -47,6 +62,102 @@ class _SheetMusicSectionState extends State<SheetMusicSection> {
       ).showSnackBar(SnackBar(content: Text("Couldn't attach that file: $e")));
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _detectAndConfirmTimeSignature(
+    File file,
+    String extension,
+  ) async {
+    setState(() => _detectingTimeSignature = true);
+    String? detected;
+    try {
+      detected = await _omrRepository.detectTimeSignature(file, extension);
+    } catch (_) {
+      detected = null;
+    }
+    if (mounted) setState(() => _detectingTimeSignature = false);
+    if (!mounted) return;
+    await _editTimeSignature(suggested: detected);
+  }
+
+  Future<void> _editTimeSignature({String? suggested}) async {
+    var selected = suggested ?? widget.piece.timeSignature;
+    if (!_commonTimeSignatures.contains(selected)) selected = '4/4';
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              title: const Text('Time signature'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (suggested != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Detected from your sheet music — double-check it, '
+                        "this can be wrong on photos that are hard to read.",
+                        style: Theme.of(dialogContext).textTheme.bodySmall,
+                      ),
+                    )
+                  else if (suggested == null &&
+                      _detectingTimeSignature == false)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        "Couldn't detect this automatically — set it manually.",
+                        style: Theme.of(dialogContext).textTheme.bodySmall,
+                      ),
+                    ),
+                  DropdownButton<String>(
+                    value: selected,
+                    isExpanded: true,
+                    items: _commonTimeSignatures
+                        .map(
+                          (ts) => DropdownMenuItem(value: ts, child: Text(ts)),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setDialogState(() => selected = value);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(selected),
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null) return;
+
+    try {
+      final updated = await _repository.setTimeSignature(
+        widget.piece.id,
+        result,
+      );
+      widget.onPieceUpdated(updated);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Couldn't save time signature: $e")),
+      );
     }
   }
 
@@ -193,6 +304,34 @@ class _SheetMusicSectionState extends State<SheetMusicSection> {
               ),
             ],
           ],
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(
+                Icons.timer_outlined,
+                size: 18,
+                color: colors.onBackgroundSoft,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Time signature: ${widget.piece.timeSignature}',
+                style: TextStyle(color: colors.onBackgroundSoft),
+              ),
+              const Spacer(),
+              if (_detectingTimeSignature)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  tooltip: 'Edit time signature',
+                  onPressed: () => _editTimeSignature(),
+                ),
+            ],
+          ),
         ],
       ),
     );

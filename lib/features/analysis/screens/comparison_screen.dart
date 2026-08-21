@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../piece/models/piece.dart';
 import '../../piece/models/recording.dart';
 import '../analysis_repository.dart';
 import '../models/comparison_result.dart';
@@ -15,9 +16,14 @@ import '../tempo_estimator.dart';
 class ComparisonScreen extends StatefulWidget {
   const ComparisonScreen({
     super.key,
+    required this.piece,
     required this.reference,
     required this.practice,
   });
+
+  /// Supplies the time signature used to convert timestamps into bar
+  /// numbers.
+  final Piece piece;
 
   /// The take being compared against — typically the earlier one.
   final Recording reference;
@@ -73,20 +79,22 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
     return '$minutes:$secs';
   }
 
-  /// "Bar 5" when a tempo estimate is available (assumes 4/4), otherwise
-  /// falls back to a timestamp like "0:12".
+  /// "Bar 5" when a tempo estimate is available, otherwise falls back to a
+  /// timestamp like "0:12". Uses the piece's time signature (default 4/4).
   String _formatPosition(double seconds, ComparisonResult result) {
     final bpm = result.referenceBpm;
     if (bpm == null) return _formatTime(seconds);
-    return 'Bar ${barNumberForTime(seconds, bpm)}';
+    final (beats, unit) = widget.piece.timeSignatureParts;
+    return 'Bar ${barNumberForTime(seconds, bpm, beats: beats, beatUnit: unit)}';
   }
 
   String _formatRange(double start, double end, ComparisonResult result) {
     final bpm = result.referenceBpm;
     if (bpm == null) return '${_formatTime(start)} – ${_formatTime(end)}';
 
-    final startBar = barNumberForTime(start, bpm);
-    final endBar = barNumberForTime(end, bpm);
+    final (beats, unit) = widget.piece.timeSignatureParts;
+    final startBar = barNumberForTime(start, bpm, beats: beats, beatUnit: unit);
+    final endBar = barNumberForTime(end, bpm, beats: beats, beatUnit: unit);
     return startBar == endBar ? 'Bar $startBar' : 'Bars $startBar–$endBar';
   }
 
