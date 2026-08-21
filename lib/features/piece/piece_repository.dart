@@ -68,6 +68,18 @@ class PieceRepository {
     return Piece.fromJson(row);
   }
 
+  /// Clears the reference recording — used when the reference take itself
+  /// gets deleted.
+  Future<Piece> clearReferenceRecording(String pieceId) async {
+    final row = await _client
+        .from('pieces')
+        .update({'reference_recording_id': null})
+        .eq('id', pieceId)
+        .select()
+        .single();
+    return Piece.fromJson(row);
+  }
+
   /// Uploads a sheet music file (PDF or image) and attaches it to the
   /// piece. Replaces any previously attached sheet music.
   Future<Piece> attachSheetMusic({

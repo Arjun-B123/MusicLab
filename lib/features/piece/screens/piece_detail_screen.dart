@@ -194,6 +194,77 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
     );
   }
 
+  Future<void> _deletePiece() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete this piece?'),
+        content: Text(
+          'This deletes "${_piece.title}" and all its recordings and sheet music. This can\'t be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await _pieceRepository.deletePiece(_piece.id);
+      if (!mounted) return;
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Couldn't delete: $e")));
+    }
+  }
+
+  Future<void> _deleteRecording(Recording recording) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete this take?'),
+        content: const Text("This can't be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await _repository.deleteRecording(recording);
+      if (recording.id == _piece.referenceRecordingId) {
+        final updated = await _pieceRepository.clearReferenceRecording(
+          _piece.id,
+        );
+        if (mounted) setState(() => _piece = updated);
+      }
+      _refresh();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Couldn't delete: $e")));
+    }
+  }
+
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
@@ -207,154 +278,183 @@ class _PieceDetailScreenState extends State<PieceDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(piece.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Delete piece',
+            onPressed: _deletePiece,
+          ),
+        ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  [piece.instrument, piece.status.label].join(' · '),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                if (piece.goal != null) ...[
-                  const SizedBox(height: 4),
-                  Text(piece.goal!),
-                ],
-                const SizedBox(height: 16),
-                Center(
-                  child: Column(
-                    children: [
-                      if (_isRecording)
-                        Text(
-                          _formatDuration(_elapsed),
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                      const SizedBox(height: 8),
-                      FloatingActionButton.large(
-                        onPressed: _isRecording
-                            ? _stopRecording
-                            : _startRecording,
-                        backgroundColor: _isRecording
-                            ? Theme.of(context).colorScheme.error
-                            : null,
-                        child: Icon(_isRecording ? Icons.stop : Icons.mic),
-                      ),
-                    ],
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    [piece.instrument, piece.status.label].join(' · '),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                ),
-                const SizedBox(height: 16),
-              ],
+                  if (piece.goal != null) ...[
+                    const SizedBox(height: 4),
+                    Text(piece.goal!),
+                  ],
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Column(
+                      children: [
+                        if (_isRecording)
+                          Text(
+                            _formatDuration(_elapsed),
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                        const SizedBox(height: 8),
+                        FloatingActionButton.large(
+                          onPressed: _isRecording
+                              ? _stopRecording
+                              : _startRecording,
+                          backgroundColor: _isRecording
+                              ? Theme.of(context).colorScheme.error
+                              : null,
+                          child: Icon(_isRecording ? Icons.stop : Icons.mic),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
-          SheetMusicSection(
-            piece: piece,
-            onPieceUpdated: (updated) => setState(() => _piece = updated),
+          SliverToBoxAdapter(
+            child: SheetMusicSection(
+              piece: piece,
+              onPieceUpdated: (updated) => setState(() => _piece = updated),
+            ),
           ),
-          const Divider(height: 1),
-          Expanded(
-            child: FutureBuilder<List<Recording>>(
-              future: _recordingsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
+          const SliverToBoxAdapter(child: Divider(height: 1)),
+          FutureBuilder<List<Recording>>(
+            future: _recordingsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(40),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                );
+              }
+              if (snapshot.hasError) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
                     child: Text("Couldn't load recordings: ${snapshot.error}"),
-                  );
-                }
+                  ),
+                );
+              }
 
-                final recordings = snapshot.data ?? [];
-                if (recordings.isEmpty) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
+              final recordings = snapshot.data ?? [];
+              if (recordings.isEmpty) {
+                return const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Center(
                       child: Text('No recordings yet — tap the mic to start.'),
                     ),
-                  );
-                }
+                  ),
+                );
+              }
 
-                final referenceId = _piece.referenceRecordingId;
-                final hasUsableReference =
-                    referenceId != null &&
-                    recordings.any((r) => r.id == referenceId) &&
-                    recordings.length >= 2;
-                final showCompareButton =
-                    hasUsableReference || recordings.length >= 2;
+              final referenceId = _piece.referenceRecordingId;
+              final hasUsableReference =
+                  referenceId != null &&
+                  recordings.any((r) => r.id == referenceId) &&
+                  recordings.length >= 2;
+              final showCompareButton =
+                  hasUsableReference || recordings.length >= 2;
 
-                return ListView.builder(
-                  itemCount: recordings.length + (showCompareButton ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == recordings.length) {
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        child: OutlinedButton.icon(
-                          onPressed: hasUsableReference
-                              ? _compareToReference
-                              : () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => ComparisonScreen(
-                                      reference: recordings[1],
-                                      practice: recordings[0],
-                                    ),
+              return SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index == recordings.length) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: OutlinedButton.icon(
+                        onPressed: hasUsableReference
+                            ? _compareToReference
+                            : () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ComparisonScreen(
+                                    reference: recordings[1],
+                                    practice: recordings[0],
                                   ),
                                 ),
-                          icon: const Icon(Icons.compare_arrows),
-                          label: Text(
-                            hasUsableReference
-                                ? 'Compare to reference take'
-                                : 'Compare latest two takes',
-                          ),
-                        ),
-                      );
-                    }
-                    final recording = recordings[index];
-                    final isPlaying = _playingRecordingId == recording.id;
-                    final isReference = recording.id == referenceId;
-                    final isBusy = _busyRecordingId == recording.id;
-                    return ListTile(
-                      leading: IconButton(
-                        icon: Icon(
-                          isPlaying
-                              ? Icons.stop_circle_outlined
-                              : Icons.play_circle_outline,
-                        ),
-                        onPressed: () => _togglePlayback(recording),
-                      ),
-                      title: Text(
-                        recording.durationSeconds != null
-                            ? _formatDuration(
-                                Duration(seconds: recording.durationSeconds!),
-                              )
-                            : 'Recording',
-                      ),
-                      trailing: isBusy
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : IconButton(
-                              icon: Icon(
-                                isReference ? Icons.star : Icons.star_border,
                               ),
-                              tooltip: isReference
-                                  ? 'Reference take — tap to edit its notes'
-                                  : 'Set as reference take',
-                              onPressed: () => _setAsReference(recording),
-                            ),
-                      subtitle: Text(
-                        '${recording.createdAt.month}/${recording.createdAt.day}/${recording.createdAt.year}',
+                        icon: const Icon(Icons.compare_arrows),
+                        label: Text(
+                          hasUsableReference
+                              ? 'Compare to reference take'
+                              : 'Compare latest two takes',
+                        ),
                       ),
                     );
-                  },
-                );
-              },
-            ),
+                  }
+                  final recording = recordings[index];
+                  final isPlaying = _playingRecordingId == recording.id;
+                  final isReference = recording.id == referenceId;
+                  final isBusy = _busyRecordingId == recording.id;
+                  return ListTile(
+                    leading: IconButton(
+                      icon: Icon(
+                        isPlaying
+                            ? Icons.stop_circle_outlined
+                            : Icons.play_circle_outline,
+                      ),
+                      onPressed: () => _togglePlayback(recording),
+                    ),
+                    title: Text(
+                      recording.durationSeconds != null
+                          ? _formatDuration(
+                              Duration(seconds: recording.durationSeconds!),
+                            )
+                          : 'Recording',
+                    ),
+                    trailing: isBusy
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  isReference ? Icons.star : Icons.star_border,
+                                ),
+                                tooltip: isReference
+                                    ? 'Reference take — tap to edit its notes'
+                                    : 'Set as reference take',
+                                onPressed: () => _setAsReference(recording),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline),
+                                tooltip: 'Delete take',
+                                onPressed: () => _deleteRecording(recording),
+                              ),
+                            ],
+                          ),
+                    subtitle: Text(
+                      '${recording.createdAt.month}/${recording.createdAt.day}/${recording.createdAt.year}',
+                    ),
+                  );
+                }, childCount: recordings.length + (showCompareButton ? 1 : 0)),
+              );
+            },
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
     );
